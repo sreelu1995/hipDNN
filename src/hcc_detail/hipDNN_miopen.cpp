@@ -268,7 +268,7 @@ hipdnnStatus_t  hipTomiopenLRNMode( hipdnnLRNMode_t in,
     case HIPDNN_LRN_WITHIN_CHANNEL:
         *out = miopenLRNWithinChannel;
         break;
-    case HIPDNN_LRN_CROSS_CHANNEL:
+    case HIPDNN_LRN_CROSS_CHANNEL_DIM1:
         *out = miopenLRNCrossChannel;
         break;
     }
@@ -285,7 +285,7 @@ hipdnnStatus_t  miopenTohipLRNMode( miopenLRNMode_t  in,
         *out = HIPDNN_LRN_WITHIN_CHANNEL;
         break;
     case miopenLRNCrossChannel :
-        *out = HIPDNN_LRN_CROSS_CHANNEL;
+        *out = HIPDNN_LRN_CROSS_CHANNEL_DIM1;
         break;
     }
     return retVal;

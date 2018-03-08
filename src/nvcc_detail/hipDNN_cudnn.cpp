@@ -338,7 +338,7 @@ hipdnnStatus_t  hipTocudnnLRNMode(    hipdnnLRNMode_t in,
     case HIPDNN_LRN_WITHIN_CHANNEL:
         retVal = HIPDNN_STATUS_NOT_SUPPORTED ;
         break;
-    case HIPDNN_LRN_CROSS_CHANNEL:
+    case HIPDNN_LRN_CROSS_CHANNEL_DIM1:
         *out = CUDNN_LRN_CROSS_CHANNEL_DIM1;
         break;
     }
@@ -2408,7 +2408,7 @@ hipdnnGetLRNDescriptor(    hipdnnLRNDescriptor_t normDesc,
                         double* lrnK)
 {
     
-    *mode = HIPDNN_LRN_CROSS_CHANNEL;
+    *mode = HIPDNN_LRN_CROSS_CHANNEL_DIM1;
   
     return cudnnTohipdnnStatus(
             cudnnGetLRNDescriptor(  (cudnnLRNDescriptor_t) normDesc,

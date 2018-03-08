@@ -112,7 +112,7 @@ typedef enum
 
 typedef enum {
     HIPDNN_LRN_WITHIN_CHANNEL = 0,
-    HIPDNN_LRN_CROSS_CHANNEL  = 1,
+    HIPDNN_LRN_CROSS_CHANNEL_DIM1  = 1,
 } hipdnnLRNMode_t;
 
 
