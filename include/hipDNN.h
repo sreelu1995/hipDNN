@@ -325,16 +325,24 @@ typedef enum
 //=============================================================================
 
 
-// platform specific typedefs
+// Opaque pointers
 
-#if defined(__HIP_PLATFORM_HCC__) and not defined (__HIP_PLATFORM_NVCC__)
-#include <hcc_detail/hipDNN_miopen.h>
-#elif defined(__HIP_PLATFORM_NVCC__) and not defined (__HIP_PLATFORM_HCC__)
-#include <nvcc_detail/hipDNN_cudnn.h>
-#else 
-#error("Must define exactly one of __HIP_PLATFORM_HCC__ or __HIP_PLATFORM_NVCC__");
-#endif
-
+typedef void* hipdnnHandle_t;
+typedef hipStream_t hipdnnStream_t;
+typedef void* hipdnnTensorDescriptor_t;
+typedef void* hipdnnFilterDescriptor_t;
+typedef void* hipdnnConvolutionDescriptor_t;
+typedef void* hipdnnOpTensorDescriptor_t;
+typedef void* hipdnnConvolutionFwdAlgoPerf_t;
+typedef void* hipdnnConvolutionBwdFilterAlgoPerf_t;
+typedef void* hipdnnConvolutionBwdDataAlgoPerf_t;
+typedef void* hipdnnPoolingDescriptor_t;
+typedef void* hipdnnActivationDescriptor_t;
+typedef void* hipdnnLRNDescriptor_t;
+typedef void* hipdnnDropoutDescriptor_t;
+typedef void* hipdnnRNNDescriptor_t;
+typedef void* hipdnnPersistentRNNPlan_t;
+typedef void* hipdnnReduceTensorDescriptor_t; 
 
 #ifdef __cplusplus
 extern "C" {
@@ -1253,9 +1261,9 @@ hipdnnStatus_t hipdnnSetReduceTensorDescriptor(
 
 hipdnnStatus_t hipdnnGetReductionWorkspaceSize(
                                 hipdnnHandle_t handle,
-                                const cudnnReduceTensorDescriptor_t reduceTensorDesc,
-                                const cudnnTensorDescriptor_t aDesc,
-                                const cudnnTensorDescriptor_t cDesc,
+                                const hipdnnReduceTensorDescriptor_t reduceTensorDesc,
+                                const hipdnnTensorDescriptor_t aDesc,
+                                const hipdnnTensorDescriptor_t cDesc,
                                 size_t *sizeInBytes );
 
 

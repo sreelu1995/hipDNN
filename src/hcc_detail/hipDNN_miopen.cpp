@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 #include <hipDNN.h>
+#include <hcc_detail/hipDNN_miopen.h>
 #include <stdint.h>
 #include <map>
 
