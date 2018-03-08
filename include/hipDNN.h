@@ -956,6 +956,15 @@ hipdnnStatus_t hipdnnSetDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc,
 
 hipdnnStatus_t hipdnnDestroyDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc);
 
+hipdnnStatus_t hipdnnSetFilter4dDescriptor(
+                hipdnnFilterDescriptor_t    filterDesc,
+                hipdnnDataType_t            dataType,
+                hipdnnTensorFormat_t        format,
+                int                        k,
+                int                        c,
+                int                        h,
+                int                        w);
+
 hipdnnStatus_t hipdnnSetFilterNdDescriptor(
                                 hipdnnFilterDescriptor_t             filterDesc,
                                 hipdnnDataType_t                     dataType, // image data type

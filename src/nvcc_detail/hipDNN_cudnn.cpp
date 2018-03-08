@@ -2713,6 +2713,9 @@ hipdnnStatus_t hipdnnSetTensorNdDescriptor(
 				strideA));
 }
 
+
+
+
 hipdnnStatus_t hipdnnGetTensorNdDescriptor(
                                 const hipdnnTensorDescriptor_t       tensorDesc,
                                 int                                 nbDimsRequested,
@@ -2769,6 +2772,40 @@ hipdnnStatus_t hipdnnDestroyDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutD
 	return cudnnTohipdnnStatus(
 		cudnnDestroyDropoutDescriptor((cudnnDropoutDescriptor_t)dropoutDesc));
 }
+
+hipdnnStatus_t hipdnnSetFilter4dDescriptor(
+                hipdnnFilterDescriptor_t    filterDesc,
+                hipdnnDataType_t            dataType,
+                hipdnnTensorFormat_t        format,
+                int                        k,
+                int                        c,
+                int                        h,
+                int                        w) {
+	cudnnDataType_t cuDT;
+	cudnnTensorFormat_t cuTF;
+	hipdnnStatus_t retval;
+	retval = hipTocudnnDataType(dataType, &cuDT);
+	if (retval != HIPDNN_STATUS_SUCCESS)
+		return retval;
+	
+	retval = hipTocudnnTensorFormat(format, &cuTF);
+	if (retval != HIPDNN_STATUS_SUCCESS)
+		return retval;
+ 
+        return cudnnTohipdnnStatus(
+		cudnnSetFilter4dDescriptor((cudnnFilterDescriptor_t) filterDesc,
+					   cuDT,
+					   cuTF,
+                       k,
+                       c,
+                       h,
+                       w));
+
+}
+
+
+
+
 
 hipdnnStatus_t hipdnnSetFilterNdDescriptor(
                                 hipdnnFilterDescriptor_t             filterDesc,
