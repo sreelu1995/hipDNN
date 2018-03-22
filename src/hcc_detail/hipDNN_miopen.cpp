@@ -788,12 +788,12 @@ hipdnnStatus_t hipdnnAddTensor(hipdnnHandle_t handle,
     miopenTensorOp_t tensorOp = miopenTensorOpAdd;
     int alpha2 = 0;
 
-    return miopenTohipdnnStatus(miopenOpTensor(handle,
+    return miopenTohipdnnStatus(miopenOpTensor((miopenHandle_t)handle,
                                     tensorOp,
                                     alpha,
-                                    aDesc, A,
+                                    (miopenTensorDescriptor_t)aDesc, A,
                                     beta,
-                                    cDesc, C,
+                                    (miopenTensorDescriptor_t)cDesc, C,
                                     &alpha2,
                                     cDesc, C));
 }
