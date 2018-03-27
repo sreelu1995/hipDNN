@@ -795,7 +795,7 @@ hipdnnStatus_t hipdnnAddTensor(hipdnnHandle_t handle,
                                     beta,
                                     (miopenTensorDescriptor_t)cDesc, C,
                                     &alpha2,
-                                    cDesc, C));
+                                    (miopenTensorDescriptor_t)cDesc, C));
 }
 
 //=============================================================================
@@ -1753,7 +1753,7 @@ hipdnnSetActivationDescriptor(  hipdnnActivationDescriptor_t activationDesc,
 
     return miopenTohipdnnStatus (
                 miopenSetActivationDescriptor(
-                                              activationDesc,
+                                              (miopenActivationDescriptor_t)activationDesc,
                                               mimode,
                                               0, //Alpha
                                               0, //Beta
