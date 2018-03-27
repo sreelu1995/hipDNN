@@ -24,36 +24,13 @@ EXECUTE_PROCESS(COMMAND ${HIP_PATH}/bin/hipconfig -P OUTPUT_VARIABLE HIP_PLATFOR
 
 IF(${HIP_PLATFORM} MATCHES "hcc")
 
-# Check for all library dependency paths
-#1 HIPBLAS
-  IF(NOT DEFINED ENV{HIPBLAS_PATH})
-    SET(HIPBLAS_PATH "/opt/rocm/hipblas")
-  ELSE()
-    SET(HIPBLAS_PATH $ENV{HIPBLAS_PATH})
-  ENDIF()
-
-#2 ROCBLAS
-  IF(NOT DEFINED ENV{ROCBLAS_PATH})
-    SET(ROCBLAS_PATH "/opt/rocm/rocblas")
-  ELSE()
-    SET(ROCBLAS_PATH $ENV{ROCBLAS_PATH})
-  ENDIF()
-
-#3 MIOPEN
+# MIOPEN
   if (NOT DEFINED ENV{MIOPEN_PATH})
     set(MIOPEN_PATH "/opt/rocm/miopen")
   else()
     set(MIOPEN_PATH $ENV{MIOPEN_PATH})
   endif()
 
-MESSAGE(STATUS "I am here ${MIOPEN_PATH}")
-
-#4 ROCRAND
-  IF(NOT DEFINED ENV{ROCRAND_PATH})
-    SET(ROCRAND_PATH "/opt/rocm/rocrand")
-  ELSE()
-    SET(ROCRAND_PATH $ENV{ROCRAND_PATH})
-  ENDIF()
 
 ENDIF()
 
