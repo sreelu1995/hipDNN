@@ -18,6 +18,8 @@ IF (HIP_PLATFORM MATCHES "hcc")
   ADD_LIBRARY(hipdnn SHARED  ${HIPDNNSRCS})
   set_target_properties(hipdnn PROPERTIES LINKER_LANGUAGE CXX)
   TARGET_LINK_LIBRARIES(hipdnn MIOpen)
+  install(TARGETS hipdnn DESTINATION ${CMAKE_INSTALL_PREFIX}/hipdnn/lib)
+  install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/hipdnn/include) 
 ENDIF()
   
 
