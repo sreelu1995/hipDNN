@@ -463,6 +463,8 @@ HIPDNN_EXPORT hipdnnStatus_t hipdnnGetConvolution2dForwardOutputDim(
 
 HIPDNN_EXPORT hipdnnStatus_t hipdnnDestroyConvolutionDescriptor(hipdnnConvolutionDescriptor_t convDesc);
 
+hipdnnConvolutionFwdAlgo_t GetConvolutionFwdAlgo(hipdnnConvolutionFwdAlgoPerf_t* pref);
+
 HIPDNN_EXPORT hipdnnStatus_t
 hipdnnFindConvolutionForwardAlgorithm(    hipdnnHandle_t handle,
                                         const hipdnnTensorDescriptor_t xDesc,

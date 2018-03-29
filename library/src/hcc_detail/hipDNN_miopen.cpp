@@ -445,6 +445,13 @@ hipdnnConvolutionFwdAlgo_t  GetConvolutionFwdAlgo(int i)
     return retVal;
 }
 
+hipdnnConvolutionFwdAlgo_t GetConvolutionFwdAlgo(hipdnnConvolutionFwdAlgoPerf_t* pref)
+{
+    hipdnnConvolutionFwdAlgo_t algo;
+    miopenTohipConvolutionFwdAlgo(((miopenConvAlgoPerf_t*)pref)->fwd_algo, &algo);
+    return algo;
+}
+
 //=============================================================================
 
 hipdnnStatus_t  hipTomiopenConvolutionBwdFilterAlgo(    hipdnnConvolutionBwdFilterAlgo_t in, 

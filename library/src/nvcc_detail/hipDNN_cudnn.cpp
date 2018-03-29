@@ -528,6 +528,13 @@ hipdnnConvolutionFwdAlgo_t  GetConvolutionFwdAlgo(int i)
     return retVal;
 }
 
+hipdnnConvolutionFwdAlgo_t GetConvolutionFwdAlgo(hipdnnConvolutionFwdAlgoPerf_t* pref)
+{
+    hipdnnConvolutionFwdAlgo_t algo;
+    cudnnTohipConvolutionFwdAlgo(((cudnnConvolutionFwdAlgoPerf_t*)pref)->algo, &algo);
+    return algo;
+}
+
 
 //===========================================================
 
