@@ -23,15 +23,18 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake  "${HIP_PATH}/cmake")
 EXECUTE_PROCESS(COMMAND ${HIP_PATH}/bin/hipconfig -P OUTPUT_VARIABLE HIP_PLATFORM)
 
 IF(${HIP_PLATFORM} MATCHES "hcc")
-
 # MIOPEN
   if (NOT DEFINED ENV{MIOPEN_PATH})
     set(MIOPEN_PATH "/opt/rocm/miopen")
   else()
     set(MIOPEN_PATH $ENV{MIOPEN_PATH})
   endif()
-
-
+ELSE()
+  if (NOT DEFINED ENV{CUDNN_PATH})
+    set(CUDNN_PATH "/usr/local/cudnn")
+  else()
+    set(CUDNN_PATH $ENV{CUDNN_PATH})
+  endif()
 ENDIF()
 
 add_subdirectory(library)
