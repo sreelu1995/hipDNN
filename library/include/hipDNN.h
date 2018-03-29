@@ -538,6 +538,7 @@ HIPDNN_EXPORT hipdnnStatus_t hipdnnConvolutionBackwardBias(
                                             const hipdnnTensorDescriptor_t dbDesc,
                                             void *db);
 
+hipdnnConvolutionBwdFilterAlgo_t GetConvolutionBwdFilterAlgo(hipdnnConvolutionBwdFilterAlgoPerf_t* pref);
 
 HIPDNN_EXPORT hipdnnStatus_t hipdnnFindConvolutionBackwardFilterAlgorithm(    
                                             hipdnnHandle_t handle,
@@ -601,6 +602,7 @@ HIPDNN_EXPORT hipdnnStatus_t hipdnnConvolutionBackwardFilter(
                                     const hipdnnFilterDescriptor_t dwDesc,
                                     void *dw);
 
+hipdnnConvolutionBwdDataAlgo_t GetConvolutionBwdDataAlgo(hipdnnConvolutionBwdDataAlgoPerf_t* pref);
 
 HIPDNN_EXPORT hipdnnStatus_t hipdnnGetConvolutionBackwardDataWorkspaceSize(    
                                     hipdnnHandle_t handle,

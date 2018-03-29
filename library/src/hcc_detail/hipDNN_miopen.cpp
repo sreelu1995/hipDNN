@@ -525,7 +525,12 @@ hipdnnConvolutionBwdFilterAlgo_t  GetConvolutionBwdFilterAlgo(int i)
     return retVal;
 }
 
-
+hipdnnConvolutionBwdFilterAlgo_t GetConvolutionBwdFilterAlgo(hipdnnConvolutionBwdFilterAlgoPerf_t* pref)
+{
+    hipdnnConvolutionBwdFilterAlgo_t algo;
+    miopenTohipConvolutionBwdFilterAlgo(((miopenConvAlgoPerf_t*)pref)->bwd_weights_algo, &algo);
+    return algo;
+}
 
 //=============================================================================
 
@@ -601,6 +606,14 @@ hipdnnConvolutionBwdDataAlgo_t  GetConvolutionBwdDataAlgo(int i)
     
     return retVal;
 }
+
+hipdnnConvolutionBwdDataAlgo_t GetConvolutionBwdDataAlgo(hipdnnConvolutionBwdDataAlgoPerf_t* pref)
+{
+    hipdnnConvolutionBwdDataAlgo_t algo;
+    miopenTohipConvolutionBwdDataAlgo(((miopenConvAlgoPerf_t*)pref)->bwd_data_algo, &algo);
+    return algo;
+}
+
 
 //=============================================================================
 
