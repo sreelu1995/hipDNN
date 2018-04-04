@@ -528,6 +528,13 @@ hipdnnConvolutionFwdAlgo_t  GetConvolutionFwdAlgo(int i)
     return retVal;
 }
 
+hipdnnConvolutionFwdAlgo_t GetConvolutionFwdAlgo(hipdnnConvolutionFwdAlgoPerf_t* pref)
+{
+    hipdnnConvolutionFwdAlgo_t algo;
+    cudnnTohipConvolutionFwdAlgo(((cudnnConvolutionFwdAlgoPerf_t*)pref)->algo, &algo);
+    return algo;
+}
+
 
 //===========================================================
 
@@ -629,6 +636,14 @@ hipdnnConvolutionBwdFilterAlgo_t  GetConvolutionBwdFilterAlgo(int i)
     return retVal;
 }
 
+hipdnnConvolutionBwdFilterAlgo_t GetConvolutionBwdFilterAlgo(hipdnnConvolutionBwdFilterAlgoPerf_t* pref)
+{
+    hipdnnConvolutionBwdFilterAlgo_t algo;
+    cudnnTohipConvolutionBwdFilterAlgo(((cudnnConvolutionBwdFilterAlgoPerf_t*)pref)->algo, &algo);
+    return algo;
+}
+
+
 //=============================================================================
 
 hipdnnStatus_t  cudnnTohipConvolutionBwdDataAlgo(    cudnnConvolutionBwdDataAlgo_t in, 
@@ -719,6 +734,14 @@ hipdnnConvolutionBwdDataAlgo_t  GetConvolutionBwdDataAlgo(int i)
     
     return retVal;
 }
+
+hipdnnConvolutionBwdDataAlgo_t GetConvolutionBwdDataAlgo(hipdnnConvolutionBwdDataAlgoPerf_t* pref)
+{
+    hipdnnConvolutionBwdDataAlgo_t algo;
+    cudnnTohipConvolutionBwdDataAlgo(((cudnnConvolutionBwdDataAlgoPerf_t*)pref)->algo, &algo);
+    return algo;
+}
+
 //=============================================================================
 
 hipdnnStatus_t  hipTocudnnConvolutionBwdDataPreference(    hipdnnConvolutionBwdDataPreference_t  in, 
