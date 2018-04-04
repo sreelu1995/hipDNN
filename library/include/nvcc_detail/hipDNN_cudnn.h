@@ -27,34 +27,6 @@ THE SOFTWARE.
 
 #define HIPDNN_BN_MIN_EPSILON CUDNN_BN_MIN_EPSILON
 
-typedef cudnnTensorDescriptor_t hipdnnTensorDescriptor_t;
-
-typedef cudnnFilterDescriptor_t hipdnnFilterDescriptor_t;
-
-typedef cudnnConvolutionDescriptor_t hipdnnConvolutionDescriptor_t;
-
-typedef cudnnLRNDescriptor_t hipdnnLRNDescriptor_t;
-
-typedef cudnnActivationDescriptor_t hipdnnActivationDescriptor_t;
-
-typedef cudnnPoolingDescriptor_t hipdnnPoolingDescriptor_t;
-
-typedef cudnnConvolutionFwdAlgoPerf_t hipdnnConvolutionFwdAlgoPerf_t;
-
-typedef cudnnConvolutionBwdDataAlgoPerf_t hipdnnConvolutionBwdDataAlgoPerf_t;
-
-typedef cudnnConvolutionBwdFilterAlgoPerf_t hipdnnConvolutionBwdFilterAlgoPerf_t;
-
-typedef cudnnOpTensorDescriptor_t hipdnnOpTensorDescriptor_t;
-
-typedef cudnnReduceTensorDescriptor_t hipdnnReduceTensorDescriptor_t;
-
-
-
-typedef cudaStream_t hipdnnStream_t;
-
-
-typedef cudnnHandle_t hipdnnHandle_t;
 
 hipdnnStatus_t cudnnTohipdnnStatus(cudnnStatus_t  cStatus);
 
@@ -72,8 +44,3 @@ hipdnnStatus_t  cudnnTohipConvolutionBwdDataAlgo(    cudnnConvolutionBwdDataAlgo
 
 hipdnnStatus_t cudnnTohipMathType(cudnnMathType_t in, hipdnnMathType_t *out);
 
-typedef cudnnDropoutDescriptor_t hipdnnDropoutDescriptor_t;
-
-typedef cudnnRNNDescriptor_t hipdnnRNNDescriptor_t;
-
-typedef cudnnPersistentRNNPlan_t hipdnnPersistentRNNPlan_t;

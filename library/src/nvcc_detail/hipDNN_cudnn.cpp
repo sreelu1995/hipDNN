@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 
 #include <hipDNN.h>
+#include <nvcc_detail/hipDNN_cudnn.h>
 #include "iostream"
 
 
@@ -337,7 +338,7 @@ hipdnnStatus_t  hipTocudnnLRNMode(    hipdnnLRNMode_t in,
     case HIPDNN_LRN_WITHIN_CHANNEL:
         retVal = HIPDNN_STATUS_NOT_SUPPORTED ;
         break;
-    case HIPDNN_LRN_CROSS_CHANNEL:
+    case HIPDNN_LRN_CROSS_CHANNEL_DIM1:
         *out = CUDNN_LRN_CROSS_CHANNEL_DIM1;
         break;
     }
@@ -1209,22 +1210,22 @@ hipdnnStatus_t hipTocudnnIndicesType(hipdnnIndicesType_t in, cudnnIndicesType_t 
 
 hipdnnStatus_t hipdnnCreate(hipdnnHandle_t *handle)
 {
-    return cudnnTohipdnnStatus(cudnnCreate(handle));
+    return cudnnTohipdnnStatus(cudnnCreate((cudnnHandle_t *)handle));
 }
 
 hipdnnStatus_t hipdnnDestroy(hipdnnHandle_t handle)
 {
-    return cudnnTohipdnnStatus(cudnnDestroy(handle));
+    return cudnnTohipdnnStatus(cudnnDestroy((cudnnHandle_t)handle));
 }
 
 hipdnnStatus_t hipdnnSetStream(hipdnnHandle_t handle, hipdnnStream_t streamId)
 {
-    return cudnnTohipdnnStatus(cudnnSetStream(handle, streamId));
+    return cudnnTohipdnnStatus(cudnnSetStream((cudnnHandle_t)handle, streamId));
 }
 
 hipdnnStatus_t hipdnnGetStream(hipdnnHandle_t handle, hipdnnStream_t *streamId)
 {
-    return cudnnTohipdnnStatus(cudnnGetStream(handle, streamId));
+    return cudnnTohipdnnStatus(cudnnGetStream((cudnnHandle_t)handle, streamId));
 }
 
 size_t hipdnnGetVersion()
@@ -1234,7 +1235,7 @@ size_t hipdnnGetVersion()
 
 hipdnnStatus_t hipdnnCreateTensorDescriptor(hipdnnTensorDescriptor_t *tensorDesc)
 {
-    return cudnnTohipdnnStatus(cudnnCreateTensorDescriptor(tensorDesc));
+    return cudnnTohipdnnStatus(cudnnCreateTensorDescriptor((cudnnTensorDescriptor_t *)tensorDesc));
 }
 
 //===============================
@@ -1257,7 +1258,7 @@ hipdnnStatus_t  hipdnnSetTensor4dDescriptor(    hipdnnTensorDescriptor_t tensorD
         return retVal;
     
     return cudnnTohipdnnStatus(
-                cudnnSetTensor4dDescriptor(    tensorDesc,
+                cudnnSetTensor4dDescriptor((cudnnTensorDescriptor_t)tensorDesc,
                                             cuTF, 
                                             cuDT,
                                             n, c, h, w));                
@@ -1277,7 +1278,7 @@ hipdnnStatus_t hipdnnGetTensor4dDescriptor(    hipdnnTensorDescriptor_t tensorDe
     hipdnnStatus_t    retVal;                                
                                             
     retVal = cudnnTohipdnnStatus(
-                cudnnGetTensor4dDescriptor( tensorDesc,
+                cudnnGetTensor4dDescriptor((cudnnTensorDescriptor_t) tensorDesc,
                                             &cudT,
                                             n, c, h, w,
                                             nStride, cStride,
@@ -1295,7 +1296,7 @@ hipdnnStatus_t hipdnnGetTensor4dDescriptor(    hipdnnTensorDescriptor_t tensorDe
 
 hipdnnStatus_t hipdnnDestroyTensorDescriptor(hipdnnTensorDescriptor_t tensorDesc)
 {
-return cudnnTohipdnnStatus(cudnnDestroyTensorDescriptor(tensorDesc));
+return cudnnTohipdnnStatus(cudnnDestroyTensorDescriptor((cudnnTensorDescriptor_t )tensorDesc));
 }
 
 //=============================================================================
@@ -1308,12 +1309,12 @@ hipdnnStatus_t hipdnnAddTensor(    hipdnnHandle_t handle,
                                 const hipdnnTensorDescriptor_t    cDesc, void *C)
 {
     return cudnnTohipdnnStatus(
-                cudnnAddTensor( handle,
+                cudnnAddTensor( (cudnnHandle_t)handle,
                                 alpha,
-                                aDesc, 
+                                (cudnnTensorDescriptor_t) aDesc, 
                                 A,
                                 beta,
-                                cDesc, 
+                                (cudnnTensorDescriptor_t) cDesc, 
                                 C));
 }
 
@@ -1334,8 +1335,8 @@ hipdnnOpTensor(    hipdnnHandle_t handle,
 {
                 
     return cudnnTohipdnnStatus(
-                cudnnOpTensor( handle,opTensorDesc, alpha1, 
-                                aDesc,A,alpha2,bDesc, B,beta, cDesc, C));
+                cudnnOpTensor( (cudnnHandle_t) handle, (cudnnOpTensorDescriptor_t)opTensorDesc, alpha1, 
+                               (cudnnTensorDescriptor_t)aDesc,A,alpha2,(cudnnTensorDescriptor_t)bDesc, B,beta, (cudnnTensorDescriptor_t)cDesc, C));
 }
 //======
 
@@ -1344,7 +1345,7 @@ hipdnnStatus_t hipdnnSetTensor(    hipdnnHandle_t handle,
                                 void *y,
                                 const void *valuePtr)
 {
-return cudnnTohipdnnStatus(cudnnSetTensor(handle, yDesc, y, valuePtr));
+return cudnnTohipdnnStatus(cudnnSetTensor((cudnnHandle_t)handle, (cudnnTensorDescriptor_t)yDesc, y, valuePtr));
 }
 
 //==========
@@ -1354,7 +1355,7 @@ hipdnnStatus_t hipdnnScaleTensor(    hipdnnHandle_t handle,
                                     void *y,
                                     const void *alpha)
 {
-return cudnnTohipdnnStatus( cudnnScaleTensor(handle,yDesc,y,alpha));
+return cudnnTohipdnnStatus( cudnnScaleTensor((cudnnHandle_t)handle,(cudnnTensorDescriptor_t)yDesc,y,alpha));
 }
 //=============================================================================
 
@@ -1362,7 +1363,7 @@ hipdnnStatus_t
 hipdnnCreateFilterDescriptor(hipdnnFilterDescriptor_t *filterDesc)
 {
 return cudnnTohipdnnStatus( 
-            cudnnCreateFilterDescriptor(filterDesc));    
+            cudnnCreateFilterDescriptor((cudnnFilterDescriptor_t*)filterDesc));    
     
 }
 
@@ -1372,7 +1373,7 @@ return cudnnTohipdnnStatus(
 hipdnnStatus_t
 hipdnnCreateConvolutionDescriptor(hipdnnConvolutionDescriptor_t *convDesc)
 {
-return cudnnTohipdnnStatus( cudnnCreateConvolutionDescriptor(convDesc));
+return cudnnTohipdnnStatus( cudnnCreateConvolutionDescriptor((cudnnConvolutionDescriptor_t *)convDesc));
 
 }
 //=====
@@ -1387,7 +1388,7 @@ hipdnnSetConvolutionMathType(hipdnnConvolutionDescriptor_t convDesc,
 
 	retVal = hipTocudnnMathType(mathType, &cuMT);
 	if(retVal == HIPDNN_STATUS_SUCCESS)
-		return cudnnTohipdnnStatus(cudnnSetConvolutionMathType(convDesc, cuMT));
+		return cudnnTohipdnnStatus(cudnnSetConvolutionMathType((cudnnConvolutionDescriptor_t)convDesc, cuMT));
 	return retVal;
 }
 
@@ -1409,7 +1410,7 @@ hipdnnSetConvolution2dDescriptor(    hipdnnConvolutionDescriptor_t convDesc,
         return retVal;
     
     return cudnnTohipdnnStatus(
-                cudnnSetConvolution2dDescriptor(convDesc, 
+                cudnnSetConvolution2dDescriptor((cudnnConvolutionDescriptor_t)convDesc, 
                                                 pad_h, pad_w,
                                                 u,  v,
                                                 upscalex,  upscaley,
@@ -1432,7 +1433,7 @@ hipdnnGetConvolution2dDescriptor(const hipdnnConvolutionDescriptor_t convDesc,
     cudnnDataType_t cutype;
 
     retVal = cudnnTohipdnnStatus( 
-                cudnnGetConvolution2dDescriptor(    convDesc,
+                cudnnGetConvolution2dDescriptor((cudnnConvolutionDescriptor_t)convDesc,
                                                     pad_h, pad_y,
                                                     u, v,
                                                     upscalex, upscaley,
@@ -1457,9 +1458,9 @@ hipdnnGetConvolution2dForwardOutputDim(
 {
 return     cudnnTohipdnnStatus(
                     cudnnGetConvolution2dForwardOutputDim(
-                    convDesc,
-                    inputTensorDesc,
-                    filterDesc,
+                    (cudnnConvolutionDescriptor_t)convDesc,
+                    (cudnnTensorDescriptor_t)inputTensorDesc,
+                    (cudnnFilterDescriptor_t)filterDesc,
                     n, c, h, w));
 }
 
@@ -1468,7 +1469,7 @@ return     cudnnTohipdnnStatus(
 hipdnnStatus_t
 hipdnnDestroyConvolutionDescriptor(hipdnnConvolutionDescriptor_t convDesc)
 {
-return     cudnnTohipdnnStatus(cudnnDestroyConvolutionDescriptor(convDesc));
+return     cudnnTohipdnnStatus(cudnnDestroyConvolutionDescriptor((cudnnConvolutionDescriptor_t)convDesc));
 }
 
 //=============================================================================
@@ -1484,14 +1485,14 @@ hipdnnFindConvolutionForwardAlgorithm(    hipdnnHandle_t handle,
                                         hipdnnConvolutionFwdAlgoPerf_t *perfResults)
 {
     return     cudnnTohipdnnStatus(
-                cudnnFindConvolutionForwardAlgorithm(     handle,
-                                                        xDesc,
-                                                        wDesc,
-                                                        convDesc,
-                                                        yDesc,
+                cudnnFindConvolutionForwardAlgorithm(   (cudnnHandle_t)  handle,
+                                                        (cudnnTensorDescriptor_t)xDesc,
+                                                        (cudnnFilterDescriptor_t)wDesc,
+                                                        (cudnnConvolutionDescriptor_t)convDesc,
+                                                        (cudnnTensorDescriptor_t)yDesc,
                                                         requestedAlgoCount,
                                                         returnedAlgoCount,
-                                                        perfResults));    
+                                                        (cudnnConvolutionFwdAlgoPerf_t *)perfResults));    
 }
 
 
@@ -1514,11 +1515,11 @@ hipdnnGetConvolutionForwardAlgorithm(    hipdnnHandle_t handle,
         return retVal;
     
     retVal = cudnnTohipdnnStatus(
-                cudnnGetConvolutionForwardAlgorithm( handle,
-                                                    xDesc,
-                                                    wDesc,
-                                                    convDesc,
-                                                    yDesc,
+                cudnnGetConvolutionForwardAlgorithm( (cudnnHandle_t) handle,
+                                                    (cudnnTensorDescriptor_t)xDesc,
+                                                    (cudnnFilterDescriptor_t)wDesc,
+                                                    (cudnnConvolutionDescriptor_t)convDesc,
+                                                    (cudnnTensorDescriptor_t)yDesc,
                                                     cupref,
                                                     memoryLimitInBytes,
                                                     &cualgo ));
@@ -1550,17 +1551,17 @@ hipdnnFindConvolutionForwardAlgorithmEx(hipdnnHandle_t handle,
 {
                                     
 return     cudnnTohipdnnStatus(
-                cudnnFindConvolutionForwardAlgorithmEx( handle,
-                                                        xDesc,
+                cudnnFindConvolutionForwardAlgorithmEx((cudnnHandle_t) handle,
+                                                        (cudnnTensorDescriptor_t)xDesc,
                                                         x,
-                                                        wDesc,
+                                                        (cudnnFilterDescriptor_t)wDesc,
                                                         w,
-                                                        convDesc,
-                                                        yDesc,
+                                                        (cudnnConvolutionDescriptor_t)convDesc,
+                                                        (cudnnTensorDescriptor_t)yDesc,
                                                         y,
                                                         requestedAlgoCount,
                                                         returnedAlgoCount,
-                                                        perfResults,
+                                                        (cudnnConvolutionFwdAlgoPerf_t *)perfResults,
                                                         workSpace,
                                                         workSpaceSizeInBytes));
 }
@@ -1586,11 +1587,11 @@ hipdnnGetConvolutionForwardWorkspaceSize(    hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-    cudnnGetConvolutionForwardWorkspaceSize(handle,
-                                            xDesc,  
-                                            wDesc,  
-                                            convDesc,
-                                            yDesc,
+    cudnnGetConvolutionForwardWorkspaceSize((cudnnHandle_t)handle,
+                                            (cudnnTensorDescriptor_t)xDesc,  
+                                            (cudnnFilterDescriptor_t)wDesc,  
+                                            (cudnnConvolutionDescriptor_t)convDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             cualgo,  
                                             sizeInBytes));
 
@@ -1620,18 +1621,18 @@ hipdnnConvolutionForward(    hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-                    cudnnConvolutionForward(handle,
+                    cudnnConvolutionForward((cudnnHandle_t)handle,
                                             alpha,
-                                            xDesc,
+                                            (cudnnTensorDescriptor_t)xDesc,
                                             x,
-                                            wDesc,
+                                            (cudnnFilterDescriptor_t)wDesc,
                                             w,
-                                            convDesc,
+                                            (cudnnConvolutionDescriptor_t)convDesc,
                                             cualgo,
                                             workSpace,
                                             workSpaceSizeInBytes,  
                                             beta,
-                                            yDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             y));
 
 }
@@ -1648,12 +1649,12 @@ hipdnnConvolutionBackwardBias(    hipdnnHandle_t handle,
                                 void *db)
 {
     return     cudnnTohipdnnStatus(
-                cudnnConvolutionBackwardBias(     handle,
+                cudnnConvolutionBackwardBias(   (cudnnHandle_t)  handle,
                                                 alpha,
-                                                dyDesc,
+                                                (cudnnTensorDescriptor_t)dyDesc,
                                                 dy,
                                                 beta,
-                                                dbDesc,
+                                                (cudnnTensorDescriptor_t)dbDesc,
                                                 db));
 
 }
@@ -1672,14 +1673,14 @@ hipdnnFindConvolutionBackwardFilterAlgorithm(    hipdnnHandle_t handle,
 {
     
     return     cudnnTohipdnnStatus(
-        cudnnFindConvolutionBackwardFilterAlgorithm( handle,
-        xDesc,
-        dyDesc,
-        convDesc,
-        dwDesc,
+        cudnnFindConvolutionBackwardFilterAlgorithm( (cudnnHandle_t)handle,
+        (cudnnTensorDescriptor_t)xDesc,
+        (cudnnTensorDescriptor_t)dyDesc,
+        (cudnnConvolutionDescriptor_t)convDesc,
+        (cudnnFilterDescriptor_t)dwDesc,
         requestedAlgoCount,
         returnedAlgoCount,
-        perfResults));
+        (cudnnConvolutionBwdFilterAlgoPerf_t *)perfResults));
 }
 
 hipdnnStatus_t
@@ -1703,11 +1704,11 @@ hipdnnGetConvolutionBackwardFilterAlgorithm(hipdnnHandle_t handle,
         return retVal;
 
     retVal = cudnnTohipdnnStatus(
-                cudnnGetConvolutionBackwardFilterAlgorithm( handle,
-                                                            xDesc,
-                                                            dyDesc,
-                                                            convDesc,
-                                                            dwDesc,
+                cudnnGetConvolutionBackwardFilterAlgorithm( (cudnnHandle_t)handle,
+                                                            (cudnnTensorDescriptor_t)xDesc,
+                                                            (cudnnTensorDescriptor_t)dyDesc,
+                                                            (cudnnConvolutionDescriptor_t)convDesc,
+                                                            (cudnnFilterDescriptor_t) dwDesc,
                                                             cupreference,
                                                             memoryLimitInBytes,
                                                             &cualgo));
@@ -1737,17 +1738,17 @@ hipdnnFindConvolutionBackwardFilterAlgorithmEx(    hipdnnHandle_t handle,
 {
                                             
     return     cudnnTohipdnnStatus(
-                cudnnFindConvolutionBackwardFilterAlgorithmEx(    handle,
-                                                                xDesc,
+                cudnnFindConvolutionBackwardFilterAlgorithmEx(  (cudnnHandle_t)handle,
+                                                                (cudnnTensorDescriptor_t)xDesc,
                                                                 x,
-                                                                dyDesc,
+                                                                (cudnnTensorDescriptor_t)dyDesc,
                                                                 dy,
-                                                                convDesc,
-                                                                dwDesc,
+                                                                (cudnnConvolutionDescriptor_t)convDesc,
+                                                                (cudnnFilterDescriptor_t)dwDesc,
                                                                 dw,
                                                                 requestedAlgoCount,
                                                                 returnedAlgoCount,
-                                                                perfResults,
+                                                                (cudnnConvolutionBwdFilterAlgoPerf_t *) perfResults,
                                                                 workSpace,
                                                                 workSpaceSizeInBytes));
 
@@ -1772,11 +1773,11 @@ hipdnnGetConvolutionBackwardFilterWorkspaceSize(hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-                cudnnGetConvolutionBackwardFilterWorkspaceSize( handle,
-                                                                xDesc,
-                                                                dyDesc,
-                                                                convDesc,
-                                                                dwDesc,  
+                cudnnGetConvolutionBackwardFilterWorkspaceSize( (cudnnHandle_t)handle,
+                                                                (cudnnTensorDescriptor_t)xDesc,
+                                                                (cudnnTensorDescriptor_t)dyDesc,
+                                                                (cudnnConvolutionDescriptor_t)convDesc,
+                                                                (cudnnFilterDescriptor_t) dwDesc,  
                                                                 cualgo,
                                                                 sizeInBytes));
 }
@@ -1806,7 +1807,7 @@ hipdnnConvolutionBackwardFilter(    hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-                cudnnConvolutionBackwardFilter(    handle,
+                cudnnConvolutionBackwardFilter(    (cudnnHandle_t)handle,
                                                 alpha,
                                                 xDesc,
                                                 x,
@@ -1825,7 +1826,7 @@ hipdnnConvolutionBackwardFilter(    hipdnnHandle_t handle,
         if( hstatus != HIPDNN_STATUS_SUCCESS )
                 return hstatus;
 	//return cudnnTohipdnnStatus(cudnnConvolutionBackwardFilter(handle,alpha,xDesc,x,dyDesc,dy,convDesc,CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0,workSpace,workSpaceSizeInBytes,beta,dwDesc,dw));
-	return cudnnTohipdnnStatus(cudnnConvolutionBackwardFilter(handle,alpha,xDesc,x,dyDesc,dy,convDesc,cualgo,workSpace,workSpaceSizeInBytes,beta,dwDesc,dw));
+	return cudnnTohipdnnStatus(cudnnConvolutionBackwardFilter((cudnnHandle_t)handle,alpha,(cudnnTensorDescriptor_t)xDesc,x,(cudnnTensorDescriptor_t)dyDesc,dy,(cudnnConvolutionDescriptor_t)convDesc,cualgo,workSpace,workSpaceSizeInBytes,beta,(cudnnFilterDescriptor_t)dwDesc,dw));
 }
 
 //=============================================================================
@@ -1848,11 +1849,11 @@ hipdnnGetConvolutionBackwardDataWorkspaceSize(    hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-                cudnnGetConvolutionBackwardDataWorkspaceSize(     handle,
-                                                                wDesc,
-                                                                dyDesc,
-                                                                convDesc,
-                                                                dxDesc,
+                cudnnGetConvolutionBackwardDataWorkspaceSize(     (cudnnHandle_t)handle,
+                                                                (cudnnFilterDescriptor_t)wDesc,
+                                                                (cudnnTensorDescriptor_t)dyDesc,
+                                                                (cudnnConvolutionDescriptor_t)convDesc,
+                                                               (cudnnTensorDescriptor_t) dxDesc,
                                                                 cualgo,  
                                                                 sizeInBytes));
 }
@@ -1871,14 +1872,14 @@ hipdnnFindConvolutionBackwardDataAlgorithm(    hipdnnHandle_t handle,
                                             hipdnnConvolutionBwdDataAlgoPerf_t *perfResults)
 {
     return     cudnnTohipdnnStatus(
-                cudnnFindConvolutionBackwardDataAlgorithm(     handle,
-                                                            wDesc,
-                                                            dyDesc,
-                                                            convDesc,
-                                                            dxDesc,
+                cudnnFindConvolutionBackwardDataAlgorithm(     (cudnnHandle_t)handle,
+                                                           (cudnnFilterDescriptor_t) wDesc,
+                                                            (cudnnTensorDescriptor_t)dyDesc,
+                                                            (cudnnConvolutionDescriptor_t)convDesc,
+                                                            (cudnnTensorDescriptor_t)dxDesc,
                                                             requestedAlgoCount,
                                                             returnedAlgoCount,
-                                                            perfResults));
+                                                            (cudnnConvolutionBwdDataAlgoPerf_t *)perfResults));
 }
 
 hipdnnStatus_t
@@ -1902,11 +1903,11 @@ hipdnnGetConvolutionBackwardDataAlgorithm(    hipdnnHandle_t handle,
         return retVal;
     
     retVal = cudnnTohipdnnStatus(
-                cudnnGetConvolutionBackwardDataAlgorithm(     handle,
-                                                            wDesc,
-                                                            dyDesc,
-                                                            convDesc,
-                                                            dxDesc,
+                cudnnGetConvolutionBackwardDataAlgorithm(     (cudnnHandle_t)handle,
+                                                           (cudnnFilterDescriptor_t) wDesc,
+                                                            (cudnnTensorDescriptor_t)dyDesc,
+                                                            (cudnnConvolutionDescriptor_t) convDesc,
+                                                            (cudnnTensorDescriptor_t)dxDesc,
                                                             cupreference,
                                                             memoryLimitInBytes,
                                                             &cualgo));
@@ -1935,17 +1936,17 @@ hipdnnFindConvolutionBackwardDataAlgorithmEx(hipdnnHandle_t handle,
                                             size_t workSpaceSizeInBytes)
 {
     return     cudnnTohipdnnStatus(
-                cudnnFindConvolutionBackwardDataAlgorithmEx(handle,
-                                                            wDesc,
+                cudnnFindConvolutionBackwardDataAlgorithmEx((cudnnHandle_t)handle,
+                                                            (cudnnFilterDescriptor_t) wDesc,
                                                             w,
-                                                            dyDesc,
+                                                            (cudnnTensorDescriptor_t)dyDesc,
                                                             dy,
-                                                            convDesc,
-                                                            dxDesc,
+                                                            (cudnnConvolutionDescriptor_t) convDesc,
+                                                            (cudnnTensorDescriptor_t)dxDesc,
                                                             dx,
                                                             requestedAlgoCount,
                                                             returnedAlgoCount,
-                                                            perfResults,
+                                                            (cudnnConvolutionBwdDataAlgoPerf_t *)perfResults,
                                                             workSpace,
                                                             workSpaceSizeInBytes));
 }
@@ -1978,18 +1979,18 @@ hipdnnConvolutionBackwardData(     hipdnnHandle_t handle,
     
     
     return     cudnnTohipdnnStatus(
-                cudnnConvolutionBackwardData(     handle,
+                cudnnConvolutionBackwardData(     (cudnnHandle_t)handle,
                                                 alpha,
-                                                wDesc,
+                                                (cudnnFilterDescriptor_t) wDesc,
                                                 w,
-                                                dyDesc,
+                                                (cudnnTensorDescriptor_t)dyDesc,
                                                 dy,
-                                                convDesc,
+                                                (cudnnConvolutionDescriptor_t) convDesc,
                                                 cualgo,
                                                 workSpace,
                                                 workSpaceSizeInBytes,
                                                 beta,
-                                                dxDesc,
+                                                (cudnnTensorDescriptor_t)dxDesc,
                                                 dx));
 
 }
@@ -2021,14 +2022,14 @@ hipdnnSoftmaxForward(hipdnnHandle_t handle,
         return retVal;
     
     return     cudnnTohipdnnStatus(
-                cudnnSoftmaxForward(handle,
+                cudnnSoftmaxForward((cudnnHandle_t)handle,
                                     cuSMalgo,  
                                     cuSMMode,   
                                     alpha,
-                                    xDesc,
+                                    (cudnnTensorDescriptor_t)xDesc,
                                     x, 
                                     beta,
-                                    yDesc,
+                                    (cudnnTensorDescriptor_t)yDesc,
                                     y));    
 }
 
@@ -2061,15 +2062,15 @@ hipdnnSoftmaxBackward(    hipdnnHandle_t handle,
     
     
     return     cudnnTohipdnnStatus(
-                cudnnSoftmaxBackward(    handle,
+                cudnnSoftmaxBackward(    (cudnnHandle_t)handle,
                                         cuSMalgo,  
                                         cuSMMode,
                                         alpha,
-                                        yDesc,
+                                        (cudnnTensorDescriptor_t)yDesc,
                                         y,
-                                        dyDesc,
+                                        (cudnnTensorDescriptor_t)dyDesc,
                                         dy, beta,
-                                        dxDesc,
+                                        (cudnnTensorDescriptor_t)dxDesc,
                                         dx));
 }
 
@@ -2081,7 +2082,7 @@ hipdnnStatus_t
 hipdnnCreatePoolingDescriptor(hipdnnPoolingDescriptor_t *poolingDesc)
 {
     return     cudnnTohipdnnStatus(
-                cudnnCreatePoolingDescriptor(poolingDesc));
+                cudnnCreatePoolingDescriptor((cudnnPoolingDescriptor_t *)poolingDesc));
 }
 //=============================================================================
 
@@ -2111,7 +2112,7 @@ hipdnnSetPooling2dDescriptor(    hipdnnPoolingDescriptor_t poolingDesc,
     
     return     cudnnTohipdnnStatus(    
                 cudnnSetPooling2dDescriptor(
-                poolingDesc,
+                (cudnnPoolingDescriptor_t) poolingDesc,
                 cuPMode,
                 cuNaN, 
                 windowHeight,
@@ -2142,7 +2143,7 @@ hipdnnGetPooling2dDescriptor(    const hipdnnPoolingDescriptor_t poolingDesc,
     cudnnNanPropagation_t cumaxpoolingNanOpt; 
 
     retVal = cudnnTohipdnnStatus(    
-                cudnnGetPooling2dDescriptor( poolingDesc,
+                cudnnGetPooling2dDescriptor( (cudnnPoolingDescriptor_t) poolingDesc,
                                             &cupmmode,
                                             &cumaxpoolingNanOpt,
                                             windowHeight,
@@ -2171,8 +2172,8 @@ hipdnnGetPooling2dForwardOutputDim(    const hipdnnPoolingDescriptor_t poolingDe
                                     int *n, int *c, int *h, int *w)
 {
     return cudnnTohipdnnStatus(    
-                cudnnGetPooling2dForwardOutputDim(    poolingDesc,
-                                                    inputTensorDesc,
+                cudnnGetPooling2dForwardOutputDim(  (cudnnPoolingDescriptor_t)  poolingDesc,
+                                                    (cudnnTensorDescriptor_t)inputTensorDesc,
                                                     n, c, h, w));
 }
 
@@ -2181,7 +2182,7 @@ hipdnnGetPooling2dForwardOutputDim(    const hipdnnPoolingDescriptor_t poolingDe
 hipdnnStatus_t
 hipdnnDestroyPoolingDescriptor(hipdnnPoolingDescriptor_t poolingDesc)
 {
-    return cudnnTohipdnnStatus(    cudnnDestroyPoolingDescriptor(poolingDesc));
+    return cudnnTohipdnnStatus(    cudnnDestroyPoolingDescriptor((cudnnPoolingDescriptor_t)poolingDesc));
 }
 
 //=============================================================================
@@ -2196,13 +2197,13 @@ hipdnnStatus_t hipdnnPoolingForward(hipdnnHandle_t handle,
                                     void *y)
 {
 return cudnnTohipdnnStatus( 
-            cudnnPoolingForward(handle,
-                                poolingDesc,
+            cudnnPoolingForward((cudnnHandle_t)handle,
+                                (cudnnPoolingDescriptor_t)poolingDesc,
                                 alpha,
-                                xDesc,
+                                (cudnnTensorDescriptor_t)xDesc,
                                 x,
                                 beta,
-                                yDesc,
+                                (cudnnTensorDescriptor_t)yDesc,
                                 y));
 }
 
@@ -2223,17 +2224,17 @@ hipdnnPoolingBackward(    hipdnnHandle_t handle,
                         void *dx)
 {
 return cudnnTohipdnnStatus( 
-            cudnnPoolingBackward(    handle,
-                                    poolingDesc,
+            cudnnPoolingBackward(    (cudnnHandle_t)handle,
+                                    (cudnnPoolingDescriptor_t)poolingDesc,
                                     alpha,
-                                    yDesc,
+                                    (cudnnTensorDescriptor_t)yDesc,
                                     y,
-                                    dyDesc,
+                                    (cudnnTensorDescriptor_t)dyDesc,
                                     dy,
-                                    xDesc,
+                                    (cudnnTensorDescriptor_t)xDesc,
                                     x, 
                                     beta,
-                                    dxDesc,
+                                    (cudnnTensorDescriptor_t)dxDesc,
                                     dx));
 }
 
@@ -2242,7 +2243,7 @@ return cudnnTohipdnnStatus(
 hipdnnStatus_t
 hipdnnCreateActivationDescriptor(hipdnnActivationDescriptor_t *activationDesc)
 {
-    return cudnnTohipdnnStatus(cudnnCreateActivationDescriptor(activationDesc));
+    return cudnnTohipdnnStatus(cudnnCreateActivationDescriptor((cudnnActivationDescriptor_t *)activationDesc));
 }
 
 //=============================================================================
@@ -2268,7 +2269,7 @@ hipdnnSetActivationDescriptor(    hipdnnActivationDescriptor_t activationDesc, /
     
     return cudnnTohipdnnStatus(
             cudnnSetActivationDescriptor(
-                                activationDesc, //const
+                                (cudnnActivationDescriptor_t) activationDesc, //const
                                 cuAMode,
                                 cuNaN, 
                                 reluCeiling));
@@ -2289,7 +2290,7 @@ hipdnnGetActivationDescriptor(    const hipdnnActivationDescriptor_t activationD
     cudnnNanPropagation_t cureluNanOpt;
     
     retVal = cudnnTohipdnnStatus(
-            cudnnGetActivationDescriptor(    activationDesc,
+            cudnnGetActivationDescriptor(   (cudnnActivationDescriptor_t) activationDesc,
                                             &cuactmode,
                                             &cureluNanOpt,  
                                             reluCeiling));
@@ -2310,7 +2311,7 @@ hipdnnGetActivationDescriptor(    const hipdnnActivationDescriptor_t activationD
 hipdnnStatus_t
 hipdnnDestroyActivationDescriptor(hipdnnActivationDescriptor_t activationDesc)
 {
-    return     cudnnTohipdnnStatus(cudnnDestroyActivationDescriptor(activationDesc));
+    return     cudnnTohipdnnStatus(cudnnDestroyActivationDescriptor((cudnnActivationDescriptor_t)  activationDesc));
 }
 //=================
 
@@ -2325,13 +2326,13 @@ hipdnnActivationForward(hipdnnHandle_t handle,
                         void *y)
 {
     return     cudnnTohipdnnStatus(
-                cudnnActivationForward(    handle,
-                                        activationDesc,
+                cudnnActivationForward(    (cudnnHandle_t)handle,
+                                        (cudnnActivationDescriptor_t) activationDesc,
                                         alpha,
-                                        xDesc,
+                                        (cudnnTensorDescriptor_t)xDesc,
                                         x,
                                         beta,
-                                        yDesc,
+                                        (cudnnTensorDescriptor_t)yDesc,
                                         y));
 }
 //======================
@@ -2351,16 +2352,16 @@ hipdnnActivationBackward(    hipdnnHandle_t handle,
                             void *dx)
 {
     return     cudnnTohipdnnStatus(
-                cudnnActivationBackward(     handle,
-                                            activationDesc,
+                cudnnActivationBackward(     (cudnnHandle_t)handle,
+                                            (cudnnActivationDescriptor_t) activationDesc,
                                             alpha,
-                                            yDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             y,
-                                            dyDesc,
+                                            (cudnnTensorDescriptor_t)dyDesc,
                                             dy,
-                                            xDesc,
+                                            (cudnnTensorDescriptor_t)xDesc,
                                             x, beta,
-                                            dxDesc,
+                                            (cudnnTensorDescriptor_t)dxDesc,
                                             dx));
 }
 //=============================================================================
@@ -2369,7 +2370,7 @@ hipdnnActivationBackward(    hipdnnHandle_t handle,
 hipdnnStatus_t
 hipdnnCreateLRNDescriptor(hipdnnLRNDescriptor_t *normDesc)
 {
-    return     cudnnTohipdnnStatus(cudnnCreateLRNDescriptor(normDesc));
+    return     cudnnTohipdnnStatus(cudnnCreateLRNDescriptor((cudnnLRNDescriptor_t *)normDesc));
 }
 
 //=============================================================================
@@ -2390,7 +2391,7 @@ hipdnnSetLRNDescriptor(    hipdnnLRNDescriptor_t normDesc,
         return retVal;
 
     return     cudnnTohipdnnStatus(
-                cudnnSetLRNDescriptor(    normDesc,
+                cudnnSetLRNDescriptor(  (cudnnLRNDescriptor_t) normDesc,
                                         lrnN, lrnAlpha,
                                         lrnBeta, lrnK));
 
@@ -2407,10 +2408,10 @@ hipdnnGetLRNDescriptor(    hipdnnLRNDescriptor_t normDesc,
                         double* lrnK)
 {
     
-    *mode = HIPDNN_LRN_CROSS_CHANNEL;
+    *mode = HIPDNN_LRN_CROSS_CHANNEL_DIM1;
   
     return cudnnTohipdnnStatus(
-            cudnnGetLRNDescriptor(    normDesc,
+            cudnnGetLRNDescriptor(  (cudnnLRNDescriptor_t) normDesc,
                                     lrnN, 
                                     lrnAlpha,
                                     lrnBeta, 
@@ -2424,7 +2425,7 @@ hipdnnGetLRNDescriptor(    hipdnnLRNDescriptor_t normDesc,
 hipdnnStatus_t
 hipdnnDestroyLRNDescriptor(hipdnnLRNDescriptor_t lrnDesc)
 {
-    return cudnnTohipdnnStatus(cudnnDestroyLRNDescriptor(lrnDesc));
+    return cudnnTohipdnnStatus(cudnnDestroyLRNDescriptor((cudnnLRNDescriptor_t)lrnDesc));
 }
 
 //=============================================================================
@@ -2449,14 +2450,14 @@ hipdnnLRNCrossChannelForward(    hipdnnHandle_t handle,
         return retVal;
     
     return cudnnTohipdnnStatus(
-                cudnnLRNCrossChannelForward(handle,
-                                            normDesc,
+                cudnnLRNCrossChannelForward((cudnnHandle_t)handle,
+                                            (cudnnLRNDescriptor_t)normDesc,
                                             cumode,  
                                             alpha,
-                                            xDesc,
+                                            (cudnnTensorDescriptor_t)xDesc,
                                             x,
                                             beta,
-                                            yDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             y));
 }
 
@@ -2473,14 +2474,14 @@ hipdnnLRNCrossChannelForwardEx(    hipdnnHandle_t handle,
                                 size_t workspacesize,
                                 void *workspace)
 {
-    return hipdnnLRNCrossChannelForward(handle,
-                                        normDesc,
+    return hipdnnLRNCrossChannelForward((cudnnHandle_t)handle,
+                                        (cudnnLRNDescriptor_t)normDesc,
                                         lrnMode,  
                                         alpha,
-                                        xDesc,
+                                        (cudnnTensorDescriptor_t)xDesc,
                                         x,
                                         beta,
-                                        yDesc,
+                                        (cudnnTensorDescriptor_t)yDesc,
                                         y);
 }
 
@@ -2511,17 +2512,17 @@ hipdnnLRNCrossChannelBackward(    hipdnnHandle_t handle,
         return retVal;
     
     return cudnnTohipdnnStatus(
-                cudnnLRNCrossChannelBackward(     handle,
-                                                normDesc,
+                cudnnLRNCrossChannelBackward(     (cudnnHandle_t)handle,
+                                                (cudnnLRNDescriptor_t)normDesc,
                                                 cumode,  
                                                 alpha,
-                                                yDesc,
+                                                (cudnnTensorDescriptor_t)yDesc,
                                                 y,
-                                                dyDesc,
+                                                (cudnnTensorDescriptor_t)dyDesc,
                                                 dy,
-                                                xDesc,
+                                                (cudnnTensorDescriptor_t)xDesc,
                                                 x, beta,
-                                                dxDesc,
+                                               (cudnnTensorDescriptor_t) dxDesc,
                                                 dx));
 }
 
@@ -2541,17 +2542,17 @@ hipdnnLRNCrossChannelBackwardEx(hipdnnHandle_t handle,
                                 size_t workspacesize,
                                 void* workspace)
 {
-    return hipdnnLRNCrossChannelBackward(     handle,
-                                            normDesc,
+    return hipdnnLRNCrossChannelBackward(     (cudnnHandle_t)handle,
+                                           (cudnnLRNDescriptor_t) normDesc,
                                             lrnMode,  
                                             alpha,
-                                            yDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             y,
-                                            dyDesc,
+                                            (cudnnTensorDescriptor_t)dyDesc,
                                             dy,
-                                            xDesc,
+                                            (cudnnTensorDescriptor_t)xDesc,
                                             x, beta,
-                                            dxDesc,
+                                            (cudnnTensorDescriptor_t)dxDesc,
                                             dx);    
 }
 
@@ -2564,8 +2565,8 @@ hipdnnDeriveBNTensorDescriptor(    hipdnnTensorDescriptor_t derivedBnDesc,
                                 hipdnnBatchNormMode_t mode)
 {
     return cudnnTohipdnnStatus(
-                cudnnDeriveBNTensorDescriptor(     derivedBnDesc,
-                                                xDesc,
+                cudnnDeriveBNTensorDescriptor(    (cudnnTensorDescriptor_t) derivedBnDesc,
+                                                (cudnnTensorDescriptor_t)xDesc,
                                                 hipTocudnnBatchNormMode(mode)));
 }
 
@@ -2591,15 +2592,15 @@ hipdnnBatchNormalizationForwardTraining(    hipdnnHandle_t handle,
 {
     return cudnnTohipdnnStatus(
                 cudnnBatchNormalizationForwardTraining(    
-                                        handle,
+                                        (cudnnHandle_t)handle,
                                         hipTocudnnBatchNormMode(mode),
                                         alpha, 
                                         beta,
-                                        xDesc,
+                                        (cudnnTensorDescriptor_t)xDesc,
                                         x,
-                                        yDesc,
+                                        (cudnnTensorDescriptor_t)yDesc,
                                         y,
-                                        bnScaleBiasMeanVarDesc,
+                                        (cudnnTensorDescriptor_t)bnScaleBiasMeanVarDesc,
                                         bnScale, bnBias,
                                         exponentialAverageFactor,
                                         resultRunningMean,
@@ -2629,15 +2630,15 @@ hipdnnnBatchNormalizationForwardInference(    hipdnnHandle_t handle,
 {
     return cudnnTohipdnnStatus(
             cudnnBatchNormalizationForwardInference(     
-                                            handle,
+                                            (cudnnHandle_t)handle,
                                             hipTocudnnBatchNormMode(mode),
                                             alpha, 
                                             beta,
-                                            xDesc,
+                                            (cudnnTensorDescriptor_t)xDesc,
                                             x,
-                                            yDesc,
+                                            (cudnnTensorDescriptor_t)yDesc,
                                             y,
-                                            bnScaleBiasMeanVarDesc,
+                                            (cudnnTensorDescriptor_t)bnScaleBiasMeanVarDesc,
                                             bnScale, bnBias,
                                             estimatedMean,
                                             estimatedVariance,
@@ -2668,19 +2669,19 @@ hipdnnBatchNormalizationBackward(hipdnnHandle_t handle,
                                 const void *savedInvVariance)
 {
 return cudnnTohipdnnStatus(
-cudnnBatchNormalizationBackward( handle,
+cudnnBatchNormalizationBackward( (cudnnHandle_t)handle,
                                 hipTocudnnBatchNormMode(mode),
                                 alphaDataDiff,
                                 betaDataDiff,
                                 alphaParamDiff,
                                 betaParamDiff,
-                                xDesc,
+                                (cudnnTensorDescriptor_t)xDesc,
                                 x,
-                                dyDesc,
+                                (cudnnTensorDescriptor_t)dyDesc,
                                 dy,
-                                dxDesc,
+                                (cudnnTensorDescriptor_t)dxDesc,
                                 dx,
-                                bnScaleBiasDiffDesc,
+                                (cudnnTensorDescriptor_t)bnScaleBiasDiffDesc,
                                 bnScale,
                                 resultBnScaleDiff,
                                 resultBnBiasDiff,
@@ -2705,12 +2706,15 @@ hipdnnStatus_t hipdnnSetTensorNdDescriptor(
 	
 	return cudnnTohipdnnStatus(
 	  cudnnSetTensorNdDescriptor(
-				tensorDesc,
+				(cudnnTensorDescriptor_t)tensorDesc,
 				cuDT,
 				nbDims,
 				dimA,
 				strideA));
 }
+
+
+
 
 hipdnnStatus_t hipdnnGetTensorNdDescriptor(
                                 const hipdnnTensorDescriptor_t       tensorDesc,
@@ -2724,7 +2728,7 @@ hipdnnStatus_t hipdnnGetTensorNdDescriptor(
 	hipdnnStatus_t retval;
 	retval = cudnnTohipdnnStatus(
 	  cudnnGetTensorNdDescriptor(
-				tensorDesc,
+				(cudnnTensorDescriptor_t)tensorDesc,
 				nbDimsRequested,
 				&cuDT,
 				nbDims,
@@ -2738,13 +2742,13 @@ hipdnnStatus_t hipdnnGetTensorNdDescriptor(
 hipdnnStatus_t hipdnnCreateDropoutDescriptor(hipdnnDropoutDescriptor_t * dropoutDesc)
 {
         return cudnnTohipdnnStatus(
-		cudnnCreateDropoutDescriptor(dropoutDesc));
+		cudnnCreateDropoutDescriptor((cudnnDropoutDescriptor_t *)dropoutDesc));
 }
 
 hipdnnStatus_t hipdnnDropoutGetStatesSize(hipdnnHandle_t handle, size_t * sizeInBytes)
 {
         return cudnnTohipdnnStatus(
-		cudnnDropoutGetStatesSize(handle, sizeInBytes));
+		cudnnDropoutGetStatesSize((cudnnHandle_t)handle, sizeInBytes));
 }
 
 hipdnnStatus_t hipdnnSetDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc,
@@ -2755,8 +2759,8 @@ hipdnnStatus_t hipdnnSetDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc,
                                                     unsigned long long seed)
 {
         return cudnnTohipdnnStatus(
-		cudnnSetDropoutDescriptor(dropoutDesc,
-					  handle,
+		cudnnSetDropoutDescriptor((cudnnDropoutDescriptor_t)dropoutDesc,
+					  (cudnnHandle_t)handle,
 					  dropout,
 					  states,
 					  stateSizeInBytes,
@@ -2766,8 +2770,42 @@ hipdnnStatus_t hipdnnSetDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc,
 hipdnnStatus_t hipdnnDestroyDropoutDescriptor(hipdnnDropoutDescriptor_t dropoutDesc)
 {
 	return cudnnTohipdnnStatus(
-		cudnnDestroyDropoutDescriptor(dropoutDesc));
+		cudnnDestroyDropoutDescriptor((cudnnDropoutDescriptor_t)dropoutDesc));
 }
+
+hipdnnStatus_t hipdnnSetFilter4dDescriptor(
+                hipdnnFilterDescriptor_t    filterDesc,
+                hipdnnDataType_t            dataType,
+                hipdnnTensorFormat_t        format,
+                int                        k,
+                int                        c,
+                int                        h,
+                int                        w) {
+	cudnnDataType_t cuDT;
+	cudnnTensorFormat_t cuTF;
+	hipdnnStatus_t retval;
+	retval = hipTocudnnDataType(dataType, &cuDT);
+	if (retval != HIPDNN_STATUS_SUCCESS)
+		return retval;
+	
+	retval = hipTocudnnTensorFormat(format, &cuTF);
+	if (retval != HIPDNN_STATUS_SUCCESS)
+		return retval;
+ 
+        return cudnnTohipdnnStatus(
+		cudnnSetFilter4dDescriptor((cudnnFilterDescriptor_t) filterDesc,
+					   cuDT,
+					   cuTF,
+                       k,
+                       c,
+                       h,
+                       w));
+
+}
+
+
+
+
 
 hipdnnStatus_t hipdnnSetFilterNdDescriptor(
                                 hipdnnFilterDescriptor_t             filterDesc,
@@ -2788,7 +2826,7 @@ hipdnnStatus_t hipdnnSetFilterNdDescriptor(
 		return retval;
  	
         return cudnnTohipdnnStatus(
-		cudnnSetFilterNdDescriptor(filterDesc,
+		cudnnSetFilterNdDescriptor((cudnnFilterDescriptor_t) filterDesc,
 					   cuDT,
 					   cuTF,
 					   nbDims,
@@ -2807,7 +2845,7 @@ hipdnnStatus_t hipdnnGetFilterNdDescriptor(
         cudnnTensorFormat_t cuTF;
         hipdnnStatus_t retval;
 	retval = cudnnTohipdnnStatus(
-			cudnnGetFilterNdDescriptor(filterDesc,
+			cudnnGetFilterNdDescriptor((cudnnFilterDescriptor_t) filterDesc,
 						   nbDimsRequested,
 						   &cuDT,
 						   &cuTF,
@@ -2828,7 +2866,7 @@ hipdnnStatus_t hipdnnDestroyFilterDescriptor(
                                 hipdnnFilterDescriptor_t filterDesc )
 {
         return cudnnTohipdnnStatus(
-		cudnnDestroyFilterDescriptor(filterDesc));
+		cudnnDestroyFilterDescriptor((cudnnFilterDescriptor_t) filterDesc));
 }
 
 hipdnnStatus_t hipdnnSetConvolutionNdDescriptor(
@@ -2851,7 +2889,7 @@ hipdnnStatus_t hipdnnSetConvolutionNdDescriptor(
                 return retval;
 
         return cudnnTohipdnnStatus(
-		cudnnSetConvolutionNdDescriptor(convDesc,
+		cudnnSetConvolutionNdDescriptor((cudnnConvolutionDescriptor_t)convDesc,
 						arrayLength,
 						padA,
 						filterStrideA,
@@ -2881,7 +2919,7 @@ hipdnnStatus_t hipdnnSetPoolingNdDescriptor(hipdnnPoolingDescriptor_t poolingDes
                 return retval;
 
         return cudnnTohipdnnStatus(
-		cudnnSetPoolingNdDescriptor(poolingDesc,
+		cudnnSetPoolingNdDescriptor((cudnnPoolingDescriptor_t) poolingDesc,
 					    cuPM,
 					    cuNP,
 					    nbDims,
@@ -2902,13 +2940,13 @@ const char * hipdnnGetErrorString(hipdnnStatus_t status)
 hipdnnStatus_t hipdnnCreateRNNDescriptor(hipdnnRNNDescriptor_t * rnnDesc)
 {
         return cudnnTohipdnnStatus(
-		cudnnCreateRNNDescriptor(rnnDesc));
+		cudnnCreateRNNDescriptor((cudnnRNNDescriptor_t *)rnnDesc));
 }
 
 hipdnnStatus_t hipdnnDestroyRNNDescriptor(hipdnnRNNDescriptor_t rnnDesc)
 {
         return cudnnTohipdnnStatus(
-		cudnnDestroyRNNDescriptor(rnnDesc));
+		cudnnDestroyRNNDescriptor((cudnnRNNDescriptor_t) rnnDesc));
 }
 
 hipdnnStatus_t  hipdnnCreatePersistentRNNPlan(hipdnnRNNDescriptor_t rnnDesc,
@@ -2924,10 +2962,10 @@ hipdnnStatus_t  hipdnnCreatePersistentRNNPlan(hipdnnRNNDescriptor_t rnnDesc,
 		return retval;
 
         return cudnnTohipdnnStatus(
-		cudnnCreatePersistentRNNPlan(rnnDesc,
+		cudnnCreatePersistentRNNPlan((cudnnRNNDescriptor_t)rnnDesc,
 					     minibatch,
 					     cuDT,
-					     plan));
+					     (cudnnPersistentRNNPlan_t *)plan));
 					     
 }
                                              
@@ -2935,13 +2973,13 @@ hipdnnStatus_t  hipdnnSetPersistentRNNPlan(hipdnnRNNDescriptor_t rnnDesc,
                                           hipdnnPersistentRNNPlan_t plan)
 {
         return cudnnTohipdnnStatus(
-		cudnnSetPersistentRNNPlan(rnnDesc, plan));
+		cudnnSetPersistentRNNPlan((cudnnRNNDescriptor_t)rnnDesc, (cudnnPersistentRNNPlan_t)plan));
 }
                                           
 hipdnnStatus_t  hipdnnDestroyPersistentRNNPlan(hipdnnPersistentRNNPlan_t plan)
 {
         return cudnnTohipdnnStatus(
-		cudnnDestroyPersistentRNNPlan(plan));
+		cudnnDestroyPersistentRNNPlan((cudnnPersistentRNNPlan_t)plan));
 }
                                           
 hipdnnStatus_t  hipdnnSetRNNDescriptor_v6(hipdnnHandle_t handle, 
@@ -2983,11 +3021,11 @@ hipdnnStatus_t  hipdnnSetRNNDescriptor_v6(hipdnnHandle_t handle,
                 return retval;
 	
         return cudnnTohipdnnStatus(
-		cudnnSetRNNDescriptor_v6(handle,
-                                         rnnDesc,
+		cudnnSetRNNDescriptor_v6((cudnnHandle_t)handle,
+                                        (cudnnRNNDescriptor_t) rnnDesc,
                                          hiddenSize,
                                          numLayers,
-                                         dropoutDesc,
+                                         (cudnnDropoutDescriptor_t)dropoutDesc,
                                          cuRIM,
                                          cuDM,
                                          cuRM,
@@ -3034,10 +3072,10 @@ hipdnnStatus_t  hipdnnSetRNNDescriptor(hipdnnHandle_t handle, hipdnnRNNDescripto
                 return retval;
 
         return cudnnTohipdnnStatus(
-		cudnnSetRNNDescriptor(handle, rnnDesc,
+		cudnnSetRNNDescriptor((cudnnHandle_t)handle, (cudnnRNNDescriptor_t)rnnDesc,
                                       hiddenSize,
                                       numLayers,
-                                      dropoutDesc,
+                                      (cudnnDropoutDescriptor_t)dropoutDesc,
                                       cuRIM,
                                       cuDM,
                                       cuRM,
@@ -3079,10 +3117,10 @@ hipdnnStatus_t hipdnnSetRNNDescriptor_v5(hipdnnRNNDescriptor_t rnnDesc,
         if (retval != HIPDNN_STATUS_SUCCESS)
                 return retval;
         return cudnnTohipdnnStatus(
-                cudnnSetRNNDescriptor_v5(rnnDesc,
+                cudnnSetRNNDescriptor_v5((cudnnRNNDescriptor_t)rnnDesc,
                                          hiddenSize,
                                          numLayers, 
-                                         dropoutDesc,
+                                         (cudnnDropoutDescriptor_t)dropoutDesc,
                                          cuRIM,
                                          cuDM,
                                          cuRM,
@@ -3099,10 +3137,10 @@ hipdnnStatus_t  hipdnnGetRNNWorkspaceSize( hipdnnHandle_t              handle,
                                                     )
 {
         return cudnnTohipdnnStatus(
-		cudnnGetRNNWorkspaceSize(handle,
-					 rnnDesc,
+		cudnnGetRNNWorkspaceSize((cudnnHandle_t)handle,
+					 (cudnnRNNDescriptor_t)rnnDesc,
 					 seqLength,
-					 xDesc,
+					 (cudnnTensorDescriptor_t *)xDesc,
 					 sizeInBytes));
 }
                                                       
@@ -3114,10 +3152,10 @@ hipdnnStatus_t  hipdnnGetRNNTrainingReserveSize( hipdnnHandle_t              han
                                                     )
 {
         return cudnnTohipdnnStatus(
-		cudnnGetRNNTrainingReserveSize(handle,
-					       rnnDesc,
+		cudnnGetRNNTrainingReserveSize((cudnnHandle_t)handle,
+					       (cudnnRNNDescriptor_t)rnnDesc,
 					       seqLength,
-					       xDesc,
+					       (cudnnTensorDescriptor_t *)xDesc,
 					       sizeInBytes));
 }
 
@@ -3137,9 +3175,9 @@ hipdnnStatus_t  hipdnnGetRNNParamsSize( hipdnnHandle_t              handle,
 		return retval;
 
         return cudnnTohipdnnStatus(
-		cudnnGetRNNParamsSize(handle,
-				      rnnDesc,
-				      xDesc,
+		cudnnGetRNNParamsSize((cudnnHandle_t)handle,
+				      (cudnnRNNDescriptor_t)rnnDesc,
+				      (cudnnTensorDescriptor_t)xDesc,
 				      sizeInBytes,
 				      cuDT));
 }
@@ -3156,14 +3194,14 @@ hipdnnStatus_t  hipdnnGetRNNLinLayerMatrixParams( hipdnnHandle_t              ha
                              )
 {
         return cudnnTohipdnnStatus(
-		cudnnGetRNNLinLayerMatrixParams(handle,
-						rnnDesc,
+		cudnnGetRNNLinLayerMatrixParams((cudnnHandle_t)handle,
+						(cudnnRNNDescriptor_t)rnnDesc,
 						layer,
-						xDesc,
-						wDesc,
+						(cudnnTensorDescriptor_t)xDesc,
+						(cudnnFilterDescriptor_t)wDesc,
 						w,
 						linLayerID,
-						linLayerMatDesc,
+						(cudnnFilterDescriptor_t)linLayerMatDesc,
 						linLayerMat));
 }
 
@@ -3179,14 +3217,14 @@ hipdnnStatus_t  hipdnnGetRNNLinLayerBiasParams( hipdnnHandle_t              hand
                              )
 {
         return cudnnTohipdnnStatus(
-		cudnnGetRNNLinLayerBiasParams(handle,
-					      rnnDesc,
+		cudnnGetRNNLinLayerBiasParams((cudnnHandle_t)handle,
+					      (cudnnRNNDescriptor_t)rnnDesc,
 					      layer,
-					      xDesc,
-					      wDesc,
+					      (cudnnTensorDescriptor_t)xDesc,
+					      (cudnnFilterDescriptor_t)wDesc,
 					      w,
 					      linLayerID,
-					      linLayerBiasDesc,
+					      (cudnnFilterDescriptor_t)linLayerBiasDesc,
 					      linLayerBias));
 }
 
@@ -3211,22 +3249,22 @@ hipdnnStatus_t  hipdnnRNNForwardInference( hipdnnHandle_t handle,
                                                     size_t workSpaceSizeInBytes)
 {
         return cudnnTohipdnnStatus(
-		cudnnRNNForwardInference(handle,
-                                          rnnDesc,
+		cudnnRNNForwardInference((cudnnHandle_t)handle,
+                                          (cudnnRNNDescriptor_t)rnnDesc,
                                           seqLength,
-                                          xDesc,
+                                          (cudnnTensorDescriptor_t *)xDesc,
                                           x,
-                                          hxDesc,
+                                          (cudnnTensorDescriptor_t) hxDesc,
                                           hx,
-                                          cxDesc,
+                                          (cudnnTensorDescriptor_t) cxDesc,
                                           cx,
-                                          wDesc,
+                                          (cudnnFilterDescriptor_t)wDesc,
                                           w,
-                                          yDesc,
+                                          (cudnnTensorDescriptor_t *)yDesc,
                                           y,
-                                          hyDesc,
+                                          (cudnnTensorDescriptor_t) hyDesc,
                                           hy,
-                                          cyDesc,
+                                          (cudnnTensorDescriptor_t) cyDesc,
                                           cy,
                                           workspace,
                                           workSpaceSizeInBytes));
@@ -3255,22 +3293,22 @@ hipdnnStatus_t  hipdnnRNNForwardTraining( hipdnnHandle_t handle,
                                                    size_t reserveSpaceSizeInBytes)
 {
         return cudnnTohipdnnStatus(
-	       cudnnRNNForwardTraining(handle,
-                                        rnnDesc,
+	       cudnnRNNForwardTraining((cudnnHandle_t)handle,
+                                        (cudnnRNNDescriptor_t)rnnDesc,
                                         seqLength,
-                                        xDesc,
+                                        (cudnnTensorDescriptor_t *)xDesc,
                                         x,
-                                        hxDesc,
+                                        (cudnnTensorDescriptor_t) hxDesc,
                                         hx,
-                                        cxDesc,
+                                        (cudnnTensorDescriptor_t) cxDesc,
                                         cx,
-                                        wDesc,
+                                        (cudnnFilterDescriptor_t)wDesc,
                                         w,
-                                        yDesc,
+                                        (cudnnTensorDescriptor_t*) yDesc,
                                         y,
-                                        hyDesc,
+                                        (cudnnTensorDescriptor_t) hyDesc,
                                         hy,
-                                        cyDesc,
+                                        (cudnnTensorDescriptor_t) cyDesc,
                                         cy,
                                         workspace,
                                         workSpaceSizeInBytes,
@@ -3307,8 +3345,8 @@ hipdnnStatus_t  hipdnnRNNBackwardData( hipdnnHandle_t handle,
                                                 size_t reserveSpaceSizeInBytes )
 {
         return cudnnTohipdnnStatus(
-		cudnnRNNBackwardData(handle, rnnDesc, seqLength, yDesc, y, dyDesc, dy, dhyDesc, dhy, dcyDesc, dcy, wDesc, w, hxDesc,
-					hx, cxDesc, cx, dxDesc, dx, dhxDesc, dhx, dcxDesc, dcx, workspace, workSpaceSizeInBytes, reserveSpace,
+		cudnnRNNBackwardData((cudnnHandle_t)handle,(cudnnRNNDescriptor_t) rnnDesc, seqLength, (cudnnTensorDescriptor_t*)yDesc, y, (cudnnTensorDescriptor_t*)dyDesc, dy, (cudnnTensorDescriptor_t)dhyDesc, dhy, (cudnnTensorDescriptor_t)dcyDesc, dcy, (cudnnFilterDescriptor_t)wDesc, w,(cudnnTensorDescriptor_t) hxDesc,
+					hx, (cudnnTensorDescriptor_t)cxDesc, cx, (cudnnTensorDescriptor_t *)dxDesc, dx, (cudnnTensorDescriptor_t)dhxDesc, dhx, (cudnnTensorDescriptor_t)dcxDesc, dcx, workspace, workSpaceSizeInBytes, reserveSpace,
 					 reserveSpaceSizeInBytes));
 }
 
@@ -3329,8 +3367,8 @@ hipdnnStatus_t  hipdnnRNNBackwardWeights( hipdnnHandle_t handle,
                                                    size_t reserveSpaceSizeInBytes )
 {
         return cudnnTohipdnnStatus(
-		cudnnRNNBackwardWeights(handle, rnnDesc, seqLength, xDesc, x, hxDesc, hx, yDesc, y, workspace, workSpaceSizeInBytes, 
-						dwDesc, dw, reserveSpace, reserveSpaceSizeInBytes));
+		cudnnRNNBackwardWeights((cudnnHandle_t)handle, (cudnnRNNDescriptor_t) rnnDesc, seqLength, (cudnnTensorDescriptor_t *)xDesc, x, (cudnnTensorDescriptor_t)hxDesc, hx, (cudnnTensorDescriptor_t *)yDesc, y, workspace, workSpaceSizeInBytes, 
+					(cudnnFilterDescriptor_t)	dwDesc, dw, reserveSpace, reserveSpaceSizeInBytes));
 }
 
 hipdnnStatus_t hipdnnBatchNormalizationForwardInference(
@@ -3351,8 +3389,8 @@ hipdnnStatus_t hipdnnBatchNormalizationForwardInference(
 {
 
         return cudnnTohipdnnStatus(
-                cudnnBatchNormalizationForwardInference(handle, hipTocudnnBatchNormMode(mode), alpha, beta, xDesc, x, yDesc,
-                                                        y, bnScaleBiasMeanVarDesc, bnScale, bnBias, estimatedMean, estimatedVariance, epsilon));
+                cudnnBatchNormalizationForwardInference((cudnnHandle_t)handle, hipTocudnnBatchNormMode(mode), alpha, beta, (cudnnTensorDescriptor_t)xDesc, x, (cudnnTensorDescriptor_t)yDesc,
+                                                        y, (cudnnTensorDescriptor_t)bnScaleBiasMeanVarDesc, bnScale, bnBias, estimatedMean, estimatedVariance, epsilon));
 }
 
 
@@ -3362,7 +3400,7 @@ hipdnnStatus_t hipdnnCreateReduceTensorDescriptor(
                                 hipdnnReduceTensorDescriptor_t          *reduceTensorDesc )
 {
 	return cudnnTohipdnnStatus(
-		cudnnCreateReduceTensorDescriptor(reduceTensorDesc));
+		cudnnCreateReduceTensorDescriptor((cudnnReduceTensorDescriptor_t *)reduceTensorDesc));
 }
 
 hipdnnStatus_t hipdnnSetTensor4dDescriptorEx(
@@ -3381,7 +3419,7 @@ hipdnnStatus_t hipdnnSetTensor4dDescriptorEx(
 	hipdnnStatus_t retVal;
 	retVal = hipTocudnnDataType(dataType, &cuDT);
 	if(retVal == HIPDNN_STATUS_SUCCESS)
-		return cudnnTohipdnnStatus(cudnnSetTensor4dDescriptorEx(tensorDesc, cuDT, n, c, h, w,
+		return cudnnTohipdnnStatus(cudnnSetTensor4dDescriptorEx((cudnnTensorDescriptor_t)tensorDesc, cuDT, n, c, h, w,
 									nStride, cStride, hStride, wStride));
 	return retVal;
 }
@@ -3416,7 +3454,7 @@ hipdnnStatus_t hipdnnSetReduceTensorDescriptor(
                     retVal = hipTocudnnIndicesType(reduceTensorIndicesType, &cuIT);
                     if(retVal == HIPDNN_STATUS_SUCCESS)
                     {
-                        return cudnnTohipdnnStatus(cudnnSetReduceTensorDescriptor(reduceTensorDesc, cuRTO, cuDT, cuNP, cuRTI, cuIT));
+                        return cudnnTohipdnnStatus(cudnnSetReduceTensorDescriptor((cudnnReduceTensorDescriptor_t)reduceTensorDesc, cuRTO, cuDT, cuNP, cuRTI, cuIT));
                     }
                 }
             }
@@ -3432,7 +3470,7 @@ hipdnnStatus_t hipdnnGetReductionWorkspaceSize(
                                 const hipdnnTensorDescriptor_t cDesc,
                                 size_t *sizeInBytes )
 {
-    return cudnnTohipdnnStatus(cudnnGetReductionWorkspaceSize(handle, reduceTensorDesc, aDesc, cDesc, sizeInBytes));
+    return cudnnTohipdnnStatus(cudnnGetReductionWorkspaceSize((cudnnHandle_t)handle, reduceTensorDesc, (cudnnTensorDescriptor_t)aDesc, (cudnnTensorDescriptor_t)cDesc, sizeInBytes));
 }
 
 hipdnnStatus_t hipdnnReduceTensor(
@@ -3449,13 +3487,13 @@ hipdnnStatus_t hipdnnReduceTensor(
                         const hipdnnTensorDescriptor_t       cDesc,
                         void                               *C )
 {
-    return cudnnTohipdnnStatus(cudnnReduceTensor(handle, reduceTensorDesc, indices, indicesSizeInBytes, workspace,
-                                                    workspaceSizeInBytes, alpha, aDesc, A, beta, cDesc, C));
+    return cudnnTohipdnnStatus(cudnnReduceTensor((cudnnHandle_t)handle, (cudnnReduceTensorDescriptor_t)reduceTensorDesc, indices, indicesSizeInBytes, workspace,
+                                                    workspaceSizeInBytes, alpha, (cudnnTensorDescriptor_t)aDesc, A, beta, (cudnnTensorDescriptor_t)cDesc, C));
 }
 
 hipdnnStatus_t hipdnnDestroyReduceTensorDescriptor(hipdnnReduceTensorDescriptor_t reduceTensorDesc )
 {
-    return cudnnTohipdnnStatus(cudnnDestroyReduceTensorDescriptor(reduceTensorDesc));
+    return cudnnTohipdnnStatus(cudnnDestroyReduceTensorDescriptor((cudnnReduceTensorDescriptor_t)reduceTensorDesc));
 }
 
 
