@@ -355,6 +355,47 @@ hipdnnStatus_t  hipTomiopenActivationMode(hipdnnActivationMode_t in,
     return retVal;
 }
 
+hipdnnStatus_t  miopenTohipActivationMode(miopenActivationMode_t in,
+                                          hipdnnActivationMode_t* out)
+{
+    hipdnnStatus_t retVal = HIPDNN_STATUS_SUCCESS;
+
+    switch(in)
+    {
+    case miopenActivationLOGISTIC:
+        *out = HIPDNN_ACTIVATION_SIGMOID;
+        break;
+
+    case miopenActivationRELU:
+        *out = HIPDNN_ACTIVATION_RELU;
+        break;
+
+    case miopenActivationTANH:
+        *out = HIPDNN_ACTIVATION_TANH;
+        break;
+
+    case miopenActivationPATHTRU:
+        *out = HIPDNN_ACTIVATION_PATHTRU;
+        break;
+
+    case miopenActivationSOFTRELU:
+        *out = HIPDNN_ACTIVATION_SOFTRELU;
+        break;
+
+    case miopenActivationABS:
+        *out = HIPDNN_ACTIVATION_ABS;
+        break;
+
+    case miopenActivationPOWER:
+        *out = HIPDNN_ACTIVATION_POWER;
+        break;
+
+    default:
+        retVal = HIPDNN_STATUS_NOT_SUPPORTED;
+    }
+    return retVal;
+}
+
 
 //=============================================================================
 
@@ -1805,7 +1846,7 @@ hipdnnGetActivationDescriptor(  const hipdnnActivationDescriptor_t activationDes
                                 hipdnnNanPropagation_t *reluNanOpt,  
                                 double* reluCeilingOrAlpha,
                                 double* activBeta,
-                                double* activExp);
+                                double* activExp)
 {
     hipdnnStatus_t retVal;
     miopenActivationMode_t miactmode;
