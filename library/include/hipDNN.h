@@ -37,6 +37,9 @@ THE SOFTWARE.
 //#define HIPDNN_ENABLE_SUBSTITUTION
 
 
+#define HIPDNN_BN_MIN_EPSILON 1e-05
+
+
 typedef enum
 {
     HIPDNN_STATUS_SUCCESS                      = 0,

@@ -24,7 +24,6 @@ THE SOFTWARE.
 #include <hip/hip_runtime_api.h>
 #include <miopen/miopen.h>
 
-#define HIPDNN_BN_MIN_EPSILON 1e-05
 
 hipdnnStatus_t  miopenTohipConvolutionFwdAlgo(  miopenConvFwdAlgorithm_t  in,
                                                 hipdnnConvolutionFwdAlgo_t* out);
