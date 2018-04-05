@@ -342,12 +342,12 @@ hipdnnStatus_t  hipTomiopenActivationMode(hipdnnActivationMode_t in,
         break;
         
     case HIPDNN_ACTIVATION_ELU:
-	retVal = HIPDNN_STATUS_NOT_SUPPORTED;
-	break;
+        retVal = HIPDNN_STATUS_NOT_SUPPORTED;
+        break;
 
     case HIPDNN_ACTIVATION_CLIPPED_RELU:
-	retVal = HIPDNN_STATUS_NOT_SUPPORTED;
-	break;
+        retVal = HIPDNN_STATUS_NOT_SUPPORTED;
+        break;
 
     default:
         retVal = HIPDNN_STATUS_NOT_SUPPORTED;
@@ -1777,53 +1777,56 @@ hipdnnStatus_t
 hipdnnSetActivationDescriptor(  hipdnnActivationDescriptor_t activationDesc, 
                                 hipdnnActivationMode_t mode,
                                 hipdnnNanPropagation_t reluNanOpt, 
-                                double reluCeiling)
+                                double reluCeilingOrAlpha,
+                                double activBeta,
+                                double activExp)
 {
     miopenActivationMode_t mimode;
-    hipTomiopenActivationMode(mode, &mimode);
-
+    hipdnnStatus_t retVal;
+    
+    retVal = hipTomiopenActivationMode(mode, &mimode);
+    if( retVal != HIPDNN_STATUS_SUCCESS )
+        return retVal;
+    
     return miopenTohipdnnStatus (
                 miopenSetActivationDescriptor(
                                               (miopenActivationDescriptor_t)activationDesc,
                                               mimode,
-                                              0, //Alpha
-                                              0, //Beta
-                                              1)); //Power
+                                              reluCeilingOrAlpha,
+                                              activBeta,
+                                              activExp)); 
 }
 
 //=============================================================================
-
-//HGSOS may need another function to accommodate the 3 parameters.
 
 hipdnnStatus_t
 hipdnnGetActivationDescriptor(  const hipdnnActivationDescriptor_t activationDesc,
                                 hipdnnActivationMode_t *mode,
                                 hipdnnNanPropagation_t *reluNanOpt,  
-                                double* reluCeiling)
+                                double* reluCeilingOrAlpha,
+                                double* activBeta,
+                                double* activExp);
 {
-    return HIPDNN_STATUS_NOT_SUPPORTED;
-    
-#ifdef NOTYET
-
-//HGSOS //NOTYET fix the miopenSetActivationDescriptor api first
-
-miopenStatus_t
-miopenGetActivationDescriptor(
-const miopenActivationDescriptor_t activDesc,
-miopenActivationMode_t *mode,
-double *activAlpha,
-double *activBeta,
-double *activPower)
-
-    miopenActivationDescriptor_t miActDes;
     hipdnnStatus_t retVal;
-
-    retVal = hipTomiopenActivationMode(activationDesc, &miActDes);
-
+    miopenActivationMode_t miactmode;
+    
+    retVal = miopenTohipdnnStatus(
+        miopenGetActivationDescriptor(  (miopenActivationDescriptor_t) activationDesc,
+                                        &miactmode, 
+                                        reluCeilingOrAlpha,
+                                        activBeta,
+                                        activExp));
+                     
     if( retVal != HIPDNN_STATUS_SUCCESS )
         return retVal;
-#endif
     
+    retVal = miopenTohipActivationMode( miactmode, mode );
+    if( retVal != HIPDNN_STATUS_SUCCESS )
+        return retVal;
+    
+    *reluNanOpt = HIPDNN_PROPAGATE_NAN;
+                    
+    return retVal;    
 }
 
 //=============================================================================
