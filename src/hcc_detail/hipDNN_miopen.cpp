@@ -47,6 +47,8 @@ THE SOFTWARE.
 
 //HGSOS not implemented yet because i dont know how to get the device pointers from the desc!!!
 static thread_local void* sConvolutionForwardAlgorithmWorkspace;
+static thread_local void* sConvolutionBackwardDataAlgorithmWorkspace;
+static thread_local void* sConvolutionBackwardWeightsAlgorithmWorkspace;
 
 //Eventually those can be merged, but currently i will not mix device pointers with host data in the same map...
 //HGSOS static std::map<miopenPoolingDescriptor_t, void *>  sPoolingDescToWorkspace;  ????
@@ -376,18 +378,28 @@ hipdnnStatus_t  hipTomiopenConvolutionFwdAlgo(  hipdnnConvolutionFwdAlgo_t in,
     case HIPDNN_CONVOLUTION_FWD_ALGO_WINOGRAD:
         *out = miopenConvolutionFwdAlgoWinograd;
         break;
-    /*case HIPDNN_CONVOLUTION_FWD_ALGO_COUNT:
+    case HIPDNN_CONVOLUTION_FWD_ALGO_COUNT:
+	*out = miopenConvolutionFwdAlgoDirect;
+	break;
     case HIPDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM:
+	*out = miopenConvolutionFwdAlgoDirect;
+	break;
     case HIPDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM:
+	*out = miopenConvolutionFwdAlgoDirect;
+	break;
     case HIPDNN_CONVOLUTION_FWD_ALGO_FFT_TILING:
-    case HIPDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED:*/ //TODO: will be added in future
+	*out = miopenConvolutionFwdAlgoDirect;
+	break;
+    case HIPDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED:
+	*out = miopenConvolutionFwdAlgoDirect;
+	break;
     default:
         retVal = HIPDNN_STATUS_NOT_SUPPORTED;
         break;
     }
     
     return retVal;
-} 
+} //TODO: redirect to exact algos when added in future
 
 hipdnnStatus_t  miopenTohipConvolutionFwdAlgo(  miopenConvFwdAlgorithm_t  in, 
                                                 hipdnnConvolutionFwdAlgo_t* out)
@@ -529,23 +541,26 @@ hipdnnStatus_t  hipTomiopenConvolutionBwdDataAlgo(  hipdnnConvolutionBwdDataAlgo
     switch(in)
     {   
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_0:
-        *out = miopenConvolutionBwdDataAlgoDirect;
-        break;
+	*out = miopenConvolutionBwdDataAlgoGEMM;
+	break;
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_1:
-        *out = miopenConvolutionBwdDataAlgoWinograd;
-        break;
-    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD:
-        *out = miopenConvolutionBwdDataAlgoWinograd;
-        break;
-    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED:
-        *out = miopenConvolutionBwdDataAlgoWinograd;
-        break;    
-    /*case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_COUNT:
+	*out = miopenConvolutionBwdDataAlgoDirect;
+	break;
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_FFT:
+	*out = miopenConvolutionBwdDataAlgoFFT;
+	break;
+    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD:
+	*out = miopenConvolutionBwdDataAlgoWinograd;
+	break;
+    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_3:
+	*out = miopenConvolutionBwdDataAlgoGEMM;
+	break;    
+    /*case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_COUNT:
+    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED:
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_FFT_TILING:*/ //TODO: to be added in future
     default:
-        retVal = HIPDNN_STATUS_NOT_SUPPORTED;
-        break;
+	retVal = HIPDNN_STATUS_NOT_SUPPORTED;
+	break;
     }
     return retVal;
 } 
@@ -1075,6 +1090,7 @@ hipdnnFindConvolutionForwardAlgorithmEx(hipdnnHandle_t handle,
 
     
     hipMalloc((void**)&sConvolutionForwardAlgorithmWorkspace, size);
+
     return  miopenTohipdnnStatus(
                 miopenFindConvolutionForwardAlgorithm(handle,
                                                     xDesc,
@@ -1239,6 +1255,19 @@ hipdnnFindConvolutionBackwardFilterAlgorithmEx( hipdnnHandle_t handle,
                                                 void *workSpace,
                                                 size_t workSpaceSizeInBytes)
 {
+    size_t size;
+    hipdnnStatus_t retVal;
+    retVal =  miopenTohipdnnStatus(
+                   miopenConvolutionBackwardWeightsGetWorkSpaceSize(handle,
+                                                            dyDesc,
+                                                            xDesc,
+                                                            convDesc,
+                                                            dwDesc,
+                                                            &size));
+    if( retVal != HIPDNN_STATUS_SUCCESS)
+        return retVal;
+
+    hipMalloc((void**)&sConvolutionBackwardWeightsAlgorithmWorkspace, size);
                                             
     return  miopenTohipdnnStatus(
                 miopenFindConvolutionBackwardWeightsAlgorithm(  handle,
@@ -1252,8 +1281,8 @@ hipdnnFindConvolutionBackwardFilterAlgorithmEx( hipdnnHandle_t handle,
                                                                 requestedAlgoCount,
                                                                 returnedAlgoCount,
                                                                 perfResults,
-                                                                workSpace,
-                                                                workSpaceSizeInBytes,
+                                                                sConvolutionBackwardWeightsAlgorithmWorkspace,
+                                                                size,
                                                                 true //exhaustiveSearch
                                                                 )); 
 
@@ -1401,6 +1430,19 @@ hipdnnFindConvolutionBackwardDataAlgorithmEx(hipdnnHandle_t handle,
 
 {
 
+    size_t size;
+    hipdnnStatus_t retVal;
+    retVal =  miopenTohipdnnStatus(
+                   miopenConvolutionBackwardDataGetWorkSpaceSize(handle,
+                                                            dyDesc,
+                                                            wDesc,
+                                                            convDesc,
+                                                            dxDesc,
+                                                            &size));
+    if( retVal != HIPDNN_STATUS_SUCCESS)
+        return retVal;
+
+    hipMalloc((void**)&sConvolutionBackwardDataAlgorithmWorkspace, size);
     return  miopenTohipdnnStatus(
                 miopenFindConvolutionBackwardDataAlgorithm( handle,
                 dyDesc,
@@ -1413,8 +1455,8 @@ hipdnnFindConvolutionBackwardDataAlgorithmEx(hipdnnHandle_t handle,
                 requestedAlgoCount,
                 returnedAlgoCount,
                 perfResults,
-                workSpace,
-                workSpaceSizeInBytes,
+                sConvolutionAlgorithmBackwardDataWorkspace,
+                size,
                 true // exhaustiveSearch
                 ));
 }
