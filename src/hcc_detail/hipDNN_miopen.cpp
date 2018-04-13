@@ -552,8 +552,8 @@ hipdnnStatus_t  hipTomiopenConvolutionBwdDataAlgo(  hipdnnConvolutionBwdDataAlgo
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD:
 	*out = miopenConvolutionBwdDataAlgoWinograd;
 	break;
-    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_3:
-	*out = miopenConvolutionBwdDataAlgoGEMM;
+    case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED:
+	*out = miopenTransposeBwdDataAlgoGEMM;
 	break;    
     /*case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_COUNT:
     case HIPDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED:
@@ -1455,7 +1455,7 @@ hipdnnFindConvolutionBackwardDataAlgorithmEx(hipdnnHandle_t handle,
                 requestedAlgoCount,
                 returnedAlgoCount,
                 perfResults,
-                sConvolutionAlgorithmBackwardDataWorkspace,
+                sConvolutionBackwardDataAlgorithmWorkspace,
                 size,
                 true // exhaustiveSearch
                 ));
