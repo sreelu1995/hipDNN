@@ -39,12 +39,6 @@ typedef cudnnActivationDescriptor_t hipdnnActivationDescriptor_t;
 
 typedef cudnnPoolingDescriptor_t hipdnnPoolingDescriptor_t;
 
-typedef cudnnConvolutionFwdAlgoPerf_t hipdnnConvolutionFwdAlgoPerf_t;
-
-typedef cudnnConvolutionBwdDataAlgoPerf_t hipdnnConvolutionBwdDataAlgoPerf_t;
-
-typedef cudnnConvolutionBwdFilterAlgoPerf_t hipdnnConvolutionBwdFilterAlgoPerf_t;
-
 typedef cudnnOpTensorDescriptor_t hipdnnOpTensorDescriptor_t;
 
 typedef cudnnReduceTensorDescriptor_t hipdnnReduceTensorDescriptor_t;

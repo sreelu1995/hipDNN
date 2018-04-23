@@ -1437,9 +1437,33 @@ hipdnnStatus_t hipdnnFindConvolutionForwardAlgorithm(hipdnnHandle_t handle,
 		const hipdnnTensorDescriptor_t yDesc, const int requestedAlgoCount,
 		int *returnedAlgoCount, hipdnnConvolutionFwdAlgoPerf_t *perfResults)
 {
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionForwardAlgorithm(handle, xDesc, wDesc, convDesc,
-					yDesc, requestedAlgoCount, returnedAlgoCount, perfResults));
+    cudnnConvolutionFwdAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
+
+    status = cudnnTohipdnnStatus(
+                cudnnFindConvolutionForwardAlgorithm(     handle,
+                                                        xDesc,
+                                                        wDesc,
+                                                        convDesc,
+                                                        yDesc,
+                                                        requestedAlgoCount,
+                                                        returnedAlgoCount,
+                                                        cuPerfResults));
+
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionFwdAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status == HIPDNN_STATUS_SUCCESS )
+                status = cudnnTohipMathType(cuPerfResults[i].mathType, &perfResults[i].mathType);
+            return status;
+
+        }
+    }
+
+    return status;
 }
 
 hipdnnStatus_t hipdnnGetConvolutionForwardAlgorithm(hipdnnHandle_t handle,
@@ -1478,11 +1502,36 @@ hipdnnStatus_t hipdnnFindConvolutionForwardAlgorithmEx(hipdnnHandle_t handle,
 		hipdnnConvolutionFwdAlgoPerf_t *perfResults, void *workSpace,
 		size_t workSpaceSizeInBytes)
 {
+    cudnnConvolutionFwdAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
 
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionForwardAlgorithmEx(handle, xDesc, x, wDesc, w,
-					convDesc, yDesc, y, requestedAlgoCount, returnedAlgoCount,
-					perfResults, workSpace, workSpaceSizeInBytes));
+    status = cudnnTohipdnnStatus(
+                cudnnFindConvolutionForwardAlgorithmEx( handle,
+                                                        xDesc,
+                                                        x,
+                                                        wDesc,
+                                                        w,
+                                                        convDesc,
+                                                        yDesc,
+                                                        y,
+                                                        requestedAlgoCount,
+                                                        returnedAlgoCount,
+                                                        cuPerfResults,
+                                                        workSpace,
+                                                        workSpaceSizeInBytes));
+
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionFwdAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status != HIPDNN_STATUS_SUCCESS )
+                return status;
+        }
+    }
+
+    return status;
 }
 
 //=============================================================================
@@ -1551,11 +1600,33 @@ hipdnnStatus_t hipdnnFindConvolutionBackwardFilterAlgorithm(
 		int *returnedAlgoCount,
 		hipdnnConvolutionBwdFilterAlgoPerf_t *perfResults)
 {
+    cudnnConvolutionBwdFilterAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
 
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionBackwardFilterAlgorithm(handle, xDesc, dyDesc,
-					convDesc, dwDesc, requestedAlgoCount, returnedAlgoCount,
-					perfResults));
+    status = cudnnTohipdnnStatus(
+        cudnnFindConvolutionBackwardFilterAlgorithm( handle,
+        xDesc,
+        dyDesc,
+        convDesc,
+        dwDesc,
+        requestedAlgoCount,
+        returnedAlgoCount,
+        cuPerfResults));
+
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionBwdFilterAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status == HIPDNN_STATUS_SUCCESS )
+                status = cudnnTohipMathType(cuPerfResults[i].mathType, &perfResults[i].mathType);
+            return status;
+
+        }
+    }
+
+    return status;
 }
 
 hipdnnStatus_t hipdnnGetConvolutionBackwardFilterAlgorithm(
@@ -1597,13 +1668,37 @@ hipdnnStatus_t hipdnnFindConvolutionBackwardFilterAlgorithmEx(
 		hipdnnConvolutionBwdFilterAlgoPerf_t *perfResults, void *workSpace,
 		size_t workSpaceSizeInBytes)
 {
+    cudnnConvolutionBwdFilterAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
 
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionBackwardFilterAlgorithmEx(handle, xDesc, x,
-					dyDesc, dy, convDesc, dwDesc, dw, requestedAlgoCount,
-					returnedAlgoCount, perfResults, workSpace,
-					workSpaceSizeInBytes));
+    status = cudnnTohipdnnStatus(
+                cudnnFindConvolutionBackwardFilterAlgorithmEx(    handle,
+                                                                xDesc,
+                                                                x,
+                                                                dyDesc,
+                                                                dy,
+                                                                convDesc,
+                                                                dwDesc,
+                                                                dw,
+                                                                requestedAlgoCount,
+                                                                returnedAlgoCount,
+                                                                cuPerfResults,
+                                                                workSpace,
+                                                                workSpaceSizeInBytes));
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionBwdFilterAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status == HIPDNN_STATUS_SUCCESS )
+                status = cudnnTohipMathType(cuPerfResults[i].mathType, &perfResults[i].mathType);
+            return status;
 
+        }
+    }
+
+    return status;
 }
 
 //=============================================================================
@@ -1699,10 +1794,33 @@ hipdnnStatus_t hipdnnFindConvolutionBackwardDataAlgorithm(hipdnnHandle_t handle,
 		const hipdnnTensorDescriptor_t dxDesc, const int requestedAlgoCount,
 		int *returnedAlgoCount, hipdnnConvolutionBwdDataAlgoPerf_t *perfResults)
 {
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionBackwardDataAlgorithm(handle, wDesc, dyDesc,
-					convDesc, dxDesc, requestedAlgoCount, returnedAlgoCount,
-					perfResults));
+    cudnnConvolutionBwdDataAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
+
+    status = cudnnTohipdnnStatus(
+                cudnnFindConvolutionBackwardDataAlgorithm(     handle,
+                                                            wDesc,
+                                                            dyDesc,
+                                                            convDesc,
+                                                            dxDesc,
+                                                            requestedAlgoCount,
+                                                            returnedAlgoCount,
+                                                            cuPerfResults));
+
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionBwdDataAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status == HIPDNN_STATUS_SUCCESS )
+                status = cudnnTohipMathType(cuPerfResults[i].mathType, &perfResults[i].mathType);
+            return status;
+
+        }
+    }
+
+    return status;
 }
 
 hipdnnStatus_t hipdnnGetConvolutionBackwardDataAlgorithm(hipdnnHandle_t handle,
@@ -1743,11 +1861,38 @@ hipdnnStatus_t hipdnnFindConvolutionBackwardDataAlgorithmEx(
 		hipdnnConvolutionBwdDataAlgoPerf_t *perfResults, void *workSpace,
 		size_t workSpaceSizeInBytes)
 {
-	return cudnnTohipdnnStatus(
-			cudnnFindConvolutionBackwardDataAlgorithmEx(handle, wDesc, w,
-					dyDesc, dy, convDesc, dxDesc, dx, requestedAlgoCount,
-					returnedAlgoCount, perfResults, workSpace,
-					workSpaceSizeInBytes));
+    cudnnConvolutionBwdDataAlgoPerf_t cuPerfResults[requestedAlgoCount];
+    hipdnnStatus_t status ;
+
+    status = cudnnTohipdnnStatus(
+                cudnnFindConvolutionBackwardDataAlgorithmEx(handle,
+                                                            wDesc,
+                                                            w,
+                                                            dyDesc,
+                                                            dy,
+                                                            convDesc,
+                                                            dxDesc,
+                                                            dx,
+                                                            requestedAlgoCount,
+                                                            returnedAlgoCount,
+                                                            cuPerfResults,
+                                                            workSpace,
+                                                            workSpaceSizeInBytes));
+
+    if ( status == HIPDNN_STATUS_SUCCESS )
+    {
+        for(int i=0; i < *returnedAlgoCount; i++)
+        {
+            perfResults[i].status = cudnnTohipdnnStatus(cuPerfResults[i].status);
+            status = cudnnTohipConvolutionBwdDataAlgo(cuPerfResults[i].algo, &perfResults[i].algo);
+            if( status == HIPDNN_STATUS_SUCCESS )
+                status = cudnnTohipMathType(cuPerfResults[i].mathType, &perfResults[i].mathType);
+            return status;
+
+        }
+    }
+
+    return status;
 }
 
 //=============================================================================

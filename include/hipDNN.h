@@ -298,6 +298,33 @@ typedef enum
 
 //=============================================================================
 
+struct hipdnnConvolutionFwdAlgoPerf_t {
+    hipdnnConvolutionFwdAlgo_t algo;
+    hipdnnStatus_t status;
+    float time;
+    size_t memory;
+    hipdnnMathType_t mathType;
+    long reserved[3];
+};
+
+struct hipdnnConvolutionBwdDataAlgoPerf_t {
+    hipdnnConvolutionBwdDataAlgo_t algo;
+    hipdnnStatus_t status;
+    float time;
+    size_t memory;
+    hipdnnMathType_t mathType;
+    long reserved[3];
+};
+
+struct hipdnnConvolutionBwdFilterAlgoPerf_t {
+    hipdnnConvolutionBwdFilterAlgo_t algo;
+    hipdnnStatus_t status;
+    float time;
+    size_t memory;
+    hipdnnMathType_t mathType;
+    long reserved[3];
+};
+
 // platform specific typedefs
 
 #if defined(__HIP_PLATFORM_HCC__) and not defined (__HIP_PLATFORM_NVCC__)
