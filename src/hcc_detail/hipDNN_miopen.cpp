@@ -1058,6 +1058,16 @@ hipdnnStatus_t hipdnnSetConvolutionMathType(
     return HIPDNN_STATUS_NOT_SUPPORTED;
 }
 
+hipdnnStatus_t hipdnnSetConvolutionGroupCount(
+		hipdnnConvolutionDescriptor_t convDesc, int groupCount)
+{
+#if DEBUG_CURRENT_CALL_STACK_LEVEL >= DEBUG_CALL_STACK_LEVEL_ERRORS
+    std::cout <<"hipdnnSetConvolutionGroupCount - NOT SUPPORTED." << std::endl;
+#endif
+
+    return HIPDNN_STATUS_NOT_SUPPORTED;
+}
+
 //=============================================================================
 
 hipdnnStatus_t hipdnnSetConvolution2dDescriptor(

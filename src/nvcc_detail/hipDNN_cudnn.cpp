@@ -1367,6 +1367,12 @@ hipdnnStatus_t hipdnnSetConvolutionMathType(
 	return retVal;
 }
 
+hipdnnStatus_t hipdnnSetConvolutionGroupCount(
+		hipdnnConvolutionDescriptor_t convDesc, int groupCount)
+{
+    return cudnnTohipdnnStatus(cudnnSetConvolutionGroupCount(convDesc, groupCount));
+}
+
 hipdnnStatus_t hipdnnSetConvolution2dDescriptor(
 		hipdnnConvolutionDescriptor_t convDesc, int pad_h, int pad_w, int u,
 		int v, int upscalex, int upscaley, hipdnnConvolutionMode_t mode,
