@@ -1,19 +1,18 @@
 #include "test_convolution_backward_filter.hpp"
 
 TEST(convolution_bwd_filter, func_check_backward_conv_filter) {
-    Desc inputDesc(1, 3, 224, 224);
-    Desc filterDesc(21, 3, 3, 3);
+    Desc inputDesc(1, 3, 30, 30);
+    Desc filterDesc(1, 3, 5, 5);
     int pad[2] = {0, 0};    // zero padding
-    int stride[2] = {1, 1}; // stride 1
+    int stride[2] = {5, 5}; // stride 1
+
     Desc outputDesc =
         calculateConv2DOutputDesc_bwd(inputDesc, filterDesc, pad, stride);
     Memory<float> srcData = createMemory<float>(inputDesc);
     Memory<float> gradData = createMemory<float>(filterDesc);
     Memory<float> dstDataGPU = createMemory<float>(outputDesc);
     Memory<float> filterData = createMemory<float>(filterDesc);
-    populateMemoryRandom<float>(srcData);
-    populateMemoryRandom<float>(filterData);
-
+    
     test_convolution_bwd_filter testConvolutionSizes(
         inputDesc.N, 1, inputDesc.C, inputDesc.H, inputDesc.W, outputDesc.C,
         outputDesc.H, outputDesc.W, filterDesc.H, filterDesc.W, pad[0], pad[1],
@@ -21,7 +20,7 @@ TEST(convolution_bwd_filter, func_check_backward_conv_filter) {
 
   int ip_size[4] = {inputDesc.N, inputDesc.C, inputDesc.H, inputDesc.W};
   int k_size[4] = {filterDesc.N, filterDesc.C, filterDesc.H, filterDesc.W};
-  int op_size[4] =  {outputDesc.N, outputDesc.C, outputDesc.H, outputDesc.W};
+  int op_size[4] =  {filterDesc.N, filterDesc.C, filterDesc.H, filterDesc.W};
 
   std::string str_ip_size  = convert_to_string((int*)ip_size,4);
   std::string str_k_size  = convert_to_string((int*)k_size,4);
@@ -30,6 +29,9 @@ TEST(convolution_bwd_filter, func_check_backward_conv_filter) {
 high_resolution_timer_t timer;
 std::vector<double> time_vector(benchmark_iterations, 0);
     for(int i = 0; i < benchmark_iterations; i++){
+      populateMemoryRandom<float>(srcData);
+      populateMemoryRandom<float>(filterData);
+
       timer.restart();
         compute_hipdnn_conv_bwd_filter<float>(testConvolutionSizes, srcData.gpu(),
                                  filterData.gpu(), gradData.gpu(), NULL, dstDataGPU.gpu());
