@@ -20,4 +20,4 @@ FILE(GLOB HIPDNNTESTSRCS "${CMAKE_CURRENT_SOURCE_DIR}/utils/src/*.cc" ${CMAKE_CU
 INCLUDE_DIRECTORIES(${MIOPEN_PATH}/include/)
 ADD_EXECUTABLE(unittest ${HIPDNNTESTSRCS})
 TARGET_LINK_LIBRARIES(unittest hipdnn csv_integration)
-set_target_properties(unittest PROPERTIES LINK_FLAGS "-L ../library/ -lhipdnn")
+set_target_properties(unittest PROPERTIES SKIP_BUILD_RPATH 1)
