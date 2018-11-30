@@ -1,4 +1,4 @@
-nclude "test_LRN_forward.hpp"
+#include "test_LRN_forward.hpp"
 
 TEST(LRN_fwd, func_check_naive_LRN) {
   Desc inputDesc(1, 3, 7, 7);

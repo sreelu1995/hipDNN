@@ -1,4 +1,4 @@
-fndef TEST_FUSION_API_HPP
+#ifndef TEST_FUSION_API_HPP
 #define TEST_FUSION_API_HPP
 
 #include "hipdnn_test_common.h"
