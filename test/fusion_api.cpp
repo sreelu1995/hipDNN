@@ -1,6 +1,5 @@
-/*
 #include "fusion_api.hpp"
-
+/*
 TEST(fusion_api, func_check_fusion_api) {
   float avg_time = 0, avg_time1 = 0, avg_time2 = 0;
       
